@@ -23,6 +23,7 @@ import open.gl.shaders.lights.PointLight;
 import open.gl.texture.Texture;
 import open.gl.texture.TextureLoader;
 import org.joml.*;
+import org.lwjgl.nanovg.NVGColor;
 import org.lwjgl.opengl.GL;
 
 import java.lang.Math;
@@ -111,8 +112,6 @@ public class OpenGlRenderer extends Renderer {
         FpsCounter.addCallback((fps) -> {
             Debug.logInfo("FPS: " + fps);
         });
-
-        System.out.println(System.nanoTime() +  " Renderererererer " + TextureLoader.texturePool.size());
     }
 
     public void addGameObject(GameObject gameObject){
@@ -130,7 +129,7 @@ public class OpenGlRenderer extends Renderer {
         renderScene();
 
         int textureUnit = 0;
-        glClear(GL_COLOR_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
         quadShader.bind();
         {
             glDisable(GL_DEPTH_TEST);
@@ -147,8 +146,6 @@ public class OpenGlRenderer extends Renderer {
             depthQuad.render();
         }
         quadShader.unbind();
-
-        glEnable(GL_DEPTH_TEST);
 
         FpsCounter.update();
 
@@ -204,7 +201,7 @@ public class OpenGlRenderer extends Renderer {
         glEnable(GL_DEPTH_TEST);
         glCullFace(GL_BACK);
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
         shader.bind();
         {
             shader.loadMatrix4f(shader.getProjection(), eulerCamera.getProjectionMatrix());
