@@ -170,9 +170,13 @@ public class PluginManager {
                 String entryName = entry.getName();
                 if (entryName.endsWith(".class")) {
                     String className = entryName.replace("/", ".").replace(".class", "");
-                    Class<?> clazz = Class.forName(className, false, classLoader);
-                    if (Plugin.class.isAssignableFrom(clazz)) {
-                        return (Plugin) clazz.getDeclaredConstructor().newInstance();
+                    try {
+                        Class<?> clazz = Class.forName(className, false, classLoader);
+                        if (Plugin.class.isAssignableFrom(clazz)) {
+                            return (Plugin) clazz.getDeclaredConstructor().newInstance();
+                        }
+                    }catch (NoClassDefFoundError e){
+                        e.printStackTrace();
                     }
                 }
             }

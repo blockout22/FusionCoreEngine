@@ -47,8 +47,8 @@ public class FusionCore extends CoreEngine {
     public void update() {
         while(isRunning && !window.isCloseRequested()){
             renderer.update();
-            window.update();
             pluginManager.update();
+            window.update();
         }
     }
 
