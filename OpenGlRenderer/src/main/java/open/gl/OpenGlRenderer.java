@@ -126,8 +126,6 @@ public class OpenGlRenderer extends Renderer {
     @Override
     public void update() {
         drawCall = 0;
-        //        physicsWorld.debugDraw();
-
         glEnable(GL_CULL_FACE);
         cameraController.update();
 
@@ -154,14 +152,6 @@ public class OpenGlRenderer extends Renderer {
         quadShader.unbind();
 
         FpsCounter.update();
-
-//        if(GlfwInput.isKeyPressed(GlfwKey.getKeyCode("KEY_B"))){
-//            eulerCamera.setPosition(pointLight.position.x, pointLight.position.y, pointLight.position.z);
-//        }
-//
-//        if(GlfwInput.isKeyPressed(GlfwKey.getKeyCode("KEY_L"))){
-//            dirLlight.updateDirection(eulerCamera.getForwardVector());
-//        }
 
         lastDrawCallCount = drawCall;
         lastTriangleCount = triangleCount;
@@ -193,8 +183,6 @@ public class OpenGlRenderer extends Renderer {
         depthShader.bind();
         {
             //calculate light Matrix
-
-
             float distanceFromCenter = 200f;
             Matrix4f lightView = dirLlight.getLightViewMatrix(center, distanceFromCenter);
             // Calculate the light projection matrix
@@ -236,17 +224,17 @@ public class OpenGlRenderer extends Renderer {
             shader.updateDepthMap(depthFrameBuffer.getTextureId());
 
             //Lights
-            shader.updateDirLight(dirLlight);
-            angle += 0.001;
+            angle += 0.01;
 //            pointLight.position.set((Math.cos(angle) * 10), 5.0f, (Math.sin(angle) * 10));
             dirLlight.direction.add((float) Math.cos(angle), 1f, (float) Math.sin(angle)).normalize();
-//            if(angle >= Math.PI){
-//                Random r = new Random();
-////                pointLight.ambient.set(r.nextFloat(), r.nextFloat(), r.nextFloat());
-////                pointLight.diffuse.set(r.nextFloat(), r.nextFloat(), r.nextFloat());
-////                pointLight.specular.set(r.nextFloat(), r.nextFloat(), r.nextFloat());
-//                angle = -Math.PI;
-//            }
+            if(angle >= Math.PI){
+                Random r = new Random();
+                dirLlight.ambient.set(r.nextFloat(), r.nextFloat(), r.nextFloat());
+                dirLlight.diffuse.set(r.nextFloat(), r.nextFloat(), r.nextFloat());
+                dirLlight.specular.set(r.nextFloat(), r.nextFloat(), r.nextFloat());
+                angle = -Math.PI;
+            }
+            shader.updateDirLight(dirLlight);
 
 
             //calculate light Matrix

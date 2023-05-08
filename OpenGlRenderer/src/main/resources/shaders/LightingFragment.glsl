@@ -93,19 +93,19 @@ void main(){
     vec3 norm = normalize(Normal);
 
     //ambient
-    vec3 ambient = light.ambient * vec3(texture(material.diffuse, TexCoords));
+    vec3 ambient = dirLight.ambient * vec3(texture(material.diffuse, TexCoords));
 
     //diffuse
 //    vec3 lightDir = normalize(light.position - FragPos);
     vec3 lightDir = normalize(-dirLight.direction);
     float diff = max(dot(norm, lightDir), 0.0);
-    vec3 diffuse = light.diffuse * (diff * vec3(texture(material.diffuse, TexCoords)));
+    vec3 diffuse = dirLight.diffuse * (diff * vec3(texture(material.diffuse, TexCoords)));
 
     //specular
     vec3 viewDir = normalize(viewPos - FragPos);
     vec3 reflectDir = reflect(-lightDir, norm);
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
-    vec3 specular = light.specular * spec * vec3(texture(material.specular, TexCoords));
+    vec3 specular = dirLight.specular * spec * vec3(texture(material.specular, TexCoords));
 
 
     //attenuation
