@@ -13,6 +13,10 @@ public class MeshInstance extends Transform {
         if(mesh.getModel().getDiffuseTexture() != null) {
             material.diffuse = mesh.getModel().getDiffuseTexture().getID();
         }
+
+        if(mesh.getModel().getSpecularTexture() != null){
+            material.specular = mesh.getModel().getSpecularTexture().getID();
+        }
     }
 
     public Mesh getMesh() {

@@ -52,6 +52,8 @@ public class OpenGlRenderer extends Renderer {
     //Lights
     public DirLight dirLlight = new DirLight();
     public PointLight pointLight = new PointLight();
+    private Vector3f center = new Vector3f(0.0f, 0.0f, 0.0f);
+    private Matrix4f lightSpaceMatrix = new Matrix4f();
 
     public OpenGlRenderer(Window window) {
         this.window = window;
@@ -169,7 +171,7 @@ public class OpenGlRenderer extends Renderer {
         {
             //calculate light Matrix
 
-            Vector3f center = new Vector3f(0.0f, 0.0f, 0.0f);
+
             float distanceFromCenter = 200f;
             Matrix4f lightView = dirLlight.getLightViewMatrix(center, distanceFromCenter);
             // Calculate the light projection matrix
@@ -179,7 +181,6 @@ public class OpenGlRenderer extends Renderer {
             float size = 50f;
             Matrix4f lightProjection = dirLlight.getLightProjectionMatrix(-size, size, -size, size, near, far);
 
-            Matrix4f lightSpaceMatrix = new Matrix4f();
             lightSpaceMatrix = lightProjection.mul(lightView, lightSpaceMatrix);
 
             depthShader.loadMatrix4f(depthShader.getLightSpaceMatrix(), lightSpaceMatrix);
@@ -225,7 +226,7 @@ public class OpenGlRenderer extends Renderer {
 
 
             //calculate light Matrix
-            Vector3f center = new Vector3f(0.0f, 0.0f, 0.0f);
+//            Vector3f center = new Vector3f(0.0f, 0.0f, 0.0f);
             float distanceFromCenter = 200f;
             Matrix4f lightView = dirLlight.getLightViewMatrix(center, distanceFromCenter);
             // Calculate the light projection matrix
@@ -235,7 +236,7 @@ public class OpenGlRenderer extends Renderer {
             float size = 50f;
             Matrix4f lightProjection = dirLlight.getLightProjectionMatrix(-size, size, -size, size, near, far);
 
-            Matrix4f lightSpaceMatrix = new Matrix4f();
+//            Matrix4f lightSpaceMatrix = new Matrix4f();
             lightSpaceMatrix = lightProjection.mul(lightView, lightSpaceMatrix);
 
             shader.loadMatrix4f(shader.getUniformLocation("lightSpaceMatrix"), lightSpaceMatrix);

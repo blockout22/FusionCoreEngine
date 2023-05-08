@@ -10,6 +10,7 @@ public class Model {
     private int[] indices;
 
     private Texture diffuseTexture;
+    private Texture specularTexture;
 
     public Model(float[] vertices, float[] texCoords, float[] normals, int[] indices) {
         this.vertices = vertices;
@@ -24,6 +25,14 @@ public class Model {
 
     public Texture getDiffuseTexture(){
         return diffuseTexture;
+    }
+
+    public Texture getSpecularTexture() {
+        return specularTexture;
+    }
+
+    public void setSpecularTexture(Texture specularTexture) {
+        this.specularTexture = specularTexture;
     }
 
     public float[] getVertices() {

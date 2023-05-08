@@ -9,6 +9,7 @@ public class DirLight {
     public Vector3f ambient = new Vector3f(0.05f, 0.05f, 0.05f);
     public Vector3f diffuse = new Vector3f(0.4f, 0.4f, 0.4f);
     public Vector3f specular = new Vector3f(0.5f, 0.5f, 0.5f);
+    private Matrix4f lightProjection = new Matrix4f();
 
     public void updateDirection(Vector3f newDirection) {
         this.direction = new Vector3f(newDirection).normalize();
@@ -26,7 +27,6 @@ public class DirLight {
 
 
     public Matrix4f getLightProjectionMatrix(float left, float right, float bottom, float top, float near, float far) {
-        Matrix4f lightProjection = new Matrix4f();
         lightProjection.identity();
         lightProjection.ortho(left, right, bottom, top, near, far);
         return lightProjection;

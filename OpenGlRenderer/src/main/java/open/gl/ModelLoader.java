@@ -146,24 +146,10 @@ public class ModelLoader {
             }
 
             // Diffuse texture
-            ByteBuffer diffuseTextureKey = stack.ASCII("$tex.file", true);
+            ByteBuffer diffuseTextureKey = stack.ASCII(_AI_MATKEY_TEXTURE_BASE, true);
             if (aiGetMaterialProperty(material, diffuseTextureKey, aiTextureType_DIFFUSE, 0, pMaterialProperty) == aiReturn_SUCCESS) {
                 AIMaterialProperty materialProperty = AIMaterialProperty.create(pMaterialProperty.get(0));
                 ByteBuffer texturePathBuffer = materialProperty.mData();
-
-//                int texturePathLength = materialProperty.mDataLength();
-//                byte[] texturePathBytes = new byte[texturePathLength];
-//                texturePathBuffer.get(texturePathBytes, 0, texturePathLength);
-//                String texturePath = new String(texturePathBytes, StandardCharsets.UTF_8);
-//
-//                for (int i = 0; i < texturePath.length(); i++) {
-//                    char currentchar = texturePath.charAt(i);
-//                    int codePoint = (int) currentchar;
-//
-//                    if(codePoint < 32 || codePoint > 126){
-//                        System.out.printf("Non-printable character found at position %d: \\u%04X\n", i, codePoint);
-//                    }
-//                }
 
                 String texturePath = MemoryUtil.memUTF8(texturePathBuffer);
                 texturePath = texturePath.replaceAll("[^\\x20-\\x7E]", "");
@@ -172,8 +158,22 @@ public class ModelLoader {
                     Texture texture = TextureLoader.loadTexture(file.getAbsolutePath());
                     model.setDiffuseTexture(texture);
                 }
-//                Texture texture = TextureLoader.loadTexture()
-//                System.out.printf("Diffuse texture path: %s", texturePath);
+                Debug.logInfo("Diffuse texture path: " +  texturePath);
+            }
+
+            //specular texture
+            if (aiGetMaterialProperty(material, diffuseTextureKey, aiTextureType_SPECULAR, 0, pMaterialProperty) == aiReturn_SUCCESS) {
+                AIMaterialProperty materialProperty = AIMaterialProperty.create(pMaterialProperty.get(0));
+                ByteBuffer texturePathBuffer = materialProperty.mData();
+
+                String texturePath = MemoryUtil.memUTF8(texturePathBuffer);
+                texturePath = texturePath.replaceAll("[^\\x20-\\x7E]", "");
+                File file = new File(currentPath + File.separator + texturePath);
+                if(file.exists()) {
+                    Texture texture = TextureLoader.loadTexture(file.getAbsolutePath());
+                    model.setSpecularTexture(texture);
+                }
+                Debug.logInfo("Specular texture path: " +  texturePath);
             }
 
             // Add other material properties as needed
