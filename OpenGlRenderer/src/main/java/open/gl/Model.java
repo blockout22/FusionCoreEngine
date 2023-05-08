@@ -1,5 +1,7 @@
 package open.gl;
 
+import open.gl.texture.Texture;
+
 public class Model {
 
     private float[] vertices;
@@ -7,11 +9,21 @@ public class Model {
     private float[] normals;
     private int[] indices;
 
+    private Texture diffuseTexture;
+
     public Model(float[] vertices, float[] texCoords, float[] normals, int[] indices) {
         this.vertices = vertices;
         this.texCoords = texCoords;
         this.normals = normals;
         this.indices = indices;
+    }
+
+    public void setDiffuseTexture(Texture texture){
+        this.diffuseTexture = texture;
+    }
+
+    public Texture getDiffuseTexture(){
+        return diffuseTexture;
     }
 
     public float[] getVertices() {

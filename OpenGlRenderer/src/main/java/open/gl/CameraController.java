@@ -49,28 +49,29 @@ public class CameraController {
         previousPos.x = curPos.x;
         previousPos.y = curPos.y;
 
+        if(GlfwInput.isGame()) {
+            if (GlfwInput.isKeyDown(GlfwKey.getKeyCode("KEY_W"))) {
+                moveForward();
+            }
+            if (GlfwInput.isKeyDown(GlfwKey.getKeyCode("KEY_S"))) {
+                moveBackward();
+            }
 
-        if(GlfwInput.isKeyDown(GlfwKey.getKeyCode("KEY_W"))){
-            moveForward();
-        }
-        if(GlfwInput.isKeyDown(GlfwKey.getKeyCode("KEY_S"))){
-            moveBackward();
-        }
+            if (GlfwInput.isKeyDown(GlfwKey.getKeyCode("KEY_A"))) {
+                moveLeft();
+            }
 
-        if(GlfwInput.isKeyDown(GlfwKey.getKeyCode("KEY_A"))){
-            moveLeft();
-        }
+            if (GlfwInput.isKeyDown(GlfwKey.getKeyCode("KEY_D"))) {
+                moveRight();
+            }
 
-        if(GlfwInput.isKeyDown(GlfwKey.getKeyCode("KEY_D"))){
-            moveRight();
-        }
+            if (GlfwInput.isKeyDown(GlfwKey.getKeyCode("KEY_SPACE"))) {
+                moveUp();
+            }
 
-        if(GlfwInput.isKeyDown(GlfwKey.getKeyCode("KEY_SPACE"))){
-            moveUp();
-        }
-
-        if(GlfwInput.isKeyDown(GlfwKey.getKeyCode("KEY_LEFT_SHIFT"))){
-            moveDown();
+            if (GlfwInput.isKeyDown(GlfwKey.getKeyCode("KEY_LEFT_SHIFT"))) {
+                moveDown();
+            }
         }
     }
 

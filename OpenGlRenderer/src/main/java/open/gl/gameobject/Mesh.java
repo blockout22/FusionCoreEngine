@@ -39,6 +39,9 @@ public class Mesh {
         add(model.getVertices(), model.getTexCoords(), model.getNormals(), model.getIndices());
     }
 
+    public Model getModel() {
+        return model;
+    }
 
     public Matrix4f createTransformationMatrix(Transform transform){
         transformationMatrix.identity();

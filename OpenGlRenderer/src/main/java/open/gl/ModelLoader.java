@@ -1,14 +1,18 @@
 package open.gl;
 
 import com.fusion.core.engine.Debug;
+import open.gl.texture.Texture;
+import open.gl.texture.TextureLoader;
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.assimp.*;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
 
+import java.io.File;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -48,9 +52,6 @@ public class ModelLoader {
 //                    Debug.logError(prop.mData().getFloat(0));
                 }
             }
-
-            processMaterialProperties(material);
-
 
             float[] vertices = new float[aiMesh.mNumVertices() * 3];
             float[] normals = new float[aiMesh.mNumVertices() * 3];
@@ -94,6 +95,7 @@ public class ModelLoader {
             }
 
             Model model = new Model(vertices, texCoords, normals, indices);
+            processMaterialProperties(new File(path).getParent(), model, material);
 
             models.add(model);
 
@@ -108,7 +110,7 @@ public class ModelLoader {
         return models;
     }
 
-    private static void processMaterialProperties(AIMaterial material) {
+    private static void processMaterialProperties(String currentPath, Model model, AIMaterial material) {
         try (MemoryStack stack = MemoryStack.stackPush()) {
             PointerBuffer pMaterialProperty = stack.mallocPointer(1);
 
@@ -148,8 +150,30 @@ public class ModelLoader {
             if (aiGetMaterialProperty(material, diffuseTextureKey, aiTextureType_DIFFUSE, 0, pMaterialProperty) == aiReturn_SUCCESS) {
                 AIMaterialProperty materialProperty = AIMaterialProperty.create(pMaterialProperty.get(0));
                 ByteBuffer texturePathBuffer = materialProperty.mData();
+
+//                int texturePathLength = materialProperty.mDataLength();
+//                byte[] texturePathBytes = new byte[texturePathLength];
+//                texturePathBuffer.get(texturePathBytes, 0, texturePathLength);
+//                String texturePath = new String(texturePathBytes, StandardCharsets.UTF_8);
+//
+//                for (int i = 0; i < texturePath.length(); i++) {
+//                    char currentchar = texturePath.charAt(i);
+//                    int codePoint = (int) currentchar;
+//
+//                    if(codePoint < 32 || codePoint > 126){
+//                        System.out.printf("Non-printable character found at position %d: \\u%04X\n", i, codePoint);
+//                    }
+//                }
+
                 String texturePath = MemoryUtil.memUTF8(texturePathBuffer);
-//                System.out.printf("Diffuse texture path: %s\n", texturePath);
+                texturePath = texturePath.replaceAll("[^\\x20-\\x7E]", "");
+                File file = new File(currentPath + File.separator + texturePath);
+                if(file.exists()) {
+                    Texture texture = TextureLoader.loadTexture(file.getAbsolutePath());
+                    model.setDiffuseTexture(texture);
+                }
+//                Texture texture = TextureLoader.loadTexture()
+//                System.out.printf("Diffuse texture path: %s", texturePath);
             }
 
             // Add other material properties as needed
