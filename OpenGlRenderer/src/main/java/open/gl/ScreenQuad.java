@@ -64,6 +64,7 @@ public class ScreenQuad {
 
     public void render() {
         glBindVertexArray(vao);
+        OpenGlRenderer.addDrawCall();
         glDrawArrays(GL_TRIANGLES, 0, 6);
         glBindVertexArray(0);
     }

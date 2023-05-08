@@ -1,6 +1,7 @@
 package open.gl.debug;
 
 import open.gl.EulerCamera;
+import open.gl.OpenGlRenderer;
 import open.gl.Utilities;
 import open.gl.shaders.WorldShader;
 import org.joml.Matrix4f;
@@ -117,6 +118,7 @@ public class DebugRenderer {
                 shader.setColor(instances.get(i).getColor());
 
                 glLineWidth(2);
+                OpenGlRenderer.addDrawCall();
                 glDrawElements(GL_LINES, 2, GL_UNSIGNED_INT, 0);
 
                 //reset color

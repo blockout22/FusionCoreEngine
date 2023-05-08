@@ -1,6 +1,7 @@
 package open.gl.gameobject;
 
 import open.gl.Model;
+import open.gl.OpenGlRenderer;
 import open.gl.Transform;
 import open.gl.Utilities;
 import org.joml.Matrix4f;
@@ -102,9 +103,11 @@ public class Mesh {
         glBindTexture(GL_TEXTURE_2D, instance.material.specular);
         if(wireframeMode) {
             glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+            OpenGlRenderer.addDrawCall();
             glDrawElements(GL_LINE_LOOP, indicesSize, GL_UNSIGNED_INT, 0);
             glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         }else {
+            OpenGlRenderer.addDrawCall();
             glDrawElements(GL_TRIANGLES, indicesSize, GL_UNSIGNED_INT, 0);
         }
     }

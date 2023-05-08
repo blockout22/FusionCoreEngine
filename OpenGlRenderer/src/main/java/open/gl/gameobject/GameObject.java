@@ -1,5 +1,6 @@
 package open.gl.gameobject;
 
+import open.gl.OpenGlRenderer;
 import open.gl.shaders.OpenGlShader;
 
 import java.util.*;
@@ -61,6 +62,7 @@ public class GameObject {
             mesh.enable();
 
             for(MeshInstance instance : instances){
+                OpenGlRenderer.addTriangleCount(instance.getMesh().getModel().getTriangleCount());
                 shader.loadMatrix4f(shader.getUniformLocation(modelMatrix), mesh.createTransformationMatrix(instance));
                 mesh.render(instance);
             }

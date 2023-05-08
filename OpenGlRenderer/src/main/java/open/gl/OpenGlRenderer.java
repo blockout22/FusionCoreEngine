@@ -23,7 +23,6 @@ import open.gl.shaders.lights.PointLight;
 import open.gl.texture.Texture;
 import open.gl.texture.TextureLoader;
 import org.joml.*;
-import org.lwjgl.nanovg.NVGColor;
 import org.lwjgl.opengl.GL;
 
 import java.lang.Math;
@@ -33,6 +32,10 @@ import static org.lwjgl.opengl.GL13.*;
 
 public class OpenGlRenderer extends Renderer {
 
+    private static int drawCall = 0;
+    private static int lastDrawCallCount = 0;
+    private static int triangleCount = 0;
+    private static int lastTriangleCount = 0;
     private Window window;
 
     public EulerCamera eulerCamera;
@@ -122,6 +125,7 @@ public class OpenGlRenderer extends Renderer {
 
     @Override
     public void update() {
+        drawCall = 0;
         //        physicsWorld.debugDraw();
 
         glEnable(GL_CULL_FACE);
@@ -158,6 +162,25 @@ public class OpenGlRenderer extends Renderer {
 //        if(GlfwInput.isKeyPressed(GlfwKey.getKeyCode("KEY_L"))){
 //            dirLlight.updateDirection(eulerCamera.getForwardVector());
 //        }
+
+        lastDrawCallCount = drawCall;
+        lastTriangleCount = triangleCount;
+    }
+
+    public static void addDrawCall(){
+        drawCall++;
+    }
+
+    public static int getDrawCalls(){
+        return lastDrawCallCount;
+    }
+
+    public static void addTriangleCount(int triangleCount) {
+        OpenGlRenderer.triangleCount += triangleCount;
+    }
+
+    public static int getTriangleCount(){
+        return lastTriangleCount;
     }
 
     private void renderDepthScene(){
@@ -198,6 +221,7 @@ public class OpenGlRenderer extends Renderer {
 
     double angle = 0.0;
     private void renderScene(){
+        triangleCount = 0;
         finalFrameBuffer.bind();
         glEnable(GL_DEPTH_TEST);
         glCullFace(GL_BACK);

@@ -35,6 +35,10 @@ public class Model {
         this.specularTexture = specularTexture;
     }
 
+    public int getTriangleCount(){
+        return indices.length / 3;
+    }
+
     public float[] getVertices() {
         return vertices;
     }
