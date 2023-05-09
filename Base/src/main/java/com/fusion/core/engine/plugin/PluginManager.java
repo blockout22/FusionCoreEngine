@@ -175,7 +175,7 @@ public class PluginManager {
                         if (Plugin.class.isAssignableFrom(clazz)) {
                             return (Plugin) clazz.getDeclaredConstructor().newInstance();
                         }
-                    }catch (NoClassDefFoundError e){
+                    }catch (NoClassDefFoundError | UnsupportedClassVersionError e){
                         e.printStackTrace();
                     }
                 }
@@ -219,5 +219,9 @@ public class PluginManager {
             }
         };
 
+    }
+
+    public Plugin findPlugin(String id) {
+        return plugins.get(id);
     }
 }

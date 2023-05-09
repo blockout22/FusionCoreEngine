@@ -26,6 +26,9 @@ public class FusionCore extends CoreEngine {
             return false;
         }else{
             window.init();
+            for (int i = 0; i < getWindowReadyCallback().size(); i++) {
+                getWindowReadyCallback().get(i).onReady();
+            }
         }
 
         //if no renderer is set then close the application
