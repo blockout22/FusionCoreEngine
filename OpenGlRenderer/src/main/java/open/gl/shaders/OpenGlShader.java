@@ -20,8 +20,8 @@ public abstract class OpenGlShader {
     private int vertex;
     private int fragment;
 
-    private FloatBuffer matrixBuffer = BufferUtils.createFloatBuffer(4 * 4);
-    FloatBuffer buffer = null;
+    private static FloatBuffer matrixBuffer = BufferUtils.createFloatBuffer(4 * 4);
+    private static FloatBuffer buffer = null;
 
     public OpenGlShader(String vertextShader, String fragmentShader) {
         vertex = loadShader(vertextShader, GL20.GL_VERTEX_SHADER);
@@ -60,10 +60,15 @@ public abstract class OpenGlShader {
     }
 
     public int getUniformLocation(String uniform){
-        return glGetUniformLocation(program, uniform);
+        int location = glGetUniformLocation(program, uniform);
+        if(location == -1){
+            System.out.println(uniform);
+        }
+        Debug.logInfo(location);
+        return location;
     }
 
-    public void loadMatrix4f(int location, Matrix4f matrix){
+    public static void loadMatrix4f(int location, Matrix4f matrix){
         if(buffer == null){
             buffer = Utilities.createFlippedFloatBuffer(matrix);
         }else{
@@ -73,18 +78,18 @@ public abstract class OpenGlShader {
         GL20.glUniformMatrix4fv(location, false, buffer);
     }
 
-    public void loadVector3f(int location, Vector3f vector3f) {
+    public static void loadVector3f(int location, Vector3f vector3f) {
         loadVector3f(location, vector3f.x, vector3f.y, vector3f.z);
     }
-    public void loadFloat(int location, float value) {
+    public static void loadFloat(int location, float value) {
         GL20.glUniform1f(location, value);
     }
 
-    public void loadInt(int location, int value){
+    public static void loadInt(int location, int value){
         GL20.glUniform1i(location, value);
     }
 
-    public void loadVector3f(int location, float x, float y, float z){
+    public static void loadVector3f(int location, float x, float y, float z){
         GL20.glUniform3f(location, x, y, z);
     }
 

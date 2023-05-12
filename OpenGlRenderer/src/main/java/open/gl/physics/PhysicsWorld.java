@@ -70,6 +70,8 @@ public class PhysicsWorld {
             CollisionObject hitObject = rayCallback.collisionObject;
             PhysicsComponent hitPhysicsComponent = (PhysicsComponent) hitObject.getUserPointer();
             hitResults.hitComponent = hitPhysicsComponent;
+        }else{
+            hitResults.hitComponent = null;
         }
     }
 
@@ -109,6 +111,7 @@ public class PhysicsWorld {
         javax.vecmath.Vector3f intertia =  toPhysicsVector(new Vector3f());
         Quat4f rot = new Quat4f(quaternionf.x, quaternionf.y, quaternionf.z, quaternionf.w);
         javax.vecmath.Vector3f pos = new javax.vecmath.Vector3f(position.x, position.y, position.z);
+
         shape.calculateLocalInertia(mass, intertia);
         RigidBodyConstructionInfo constructionInfo = new RigidBodyConstructionInfo(
                 mass,

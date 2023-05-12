@@ -110,6 +110,7 @@ public class FrameBuffer {
 
     public void bind() {
         if(!depthOnly) {
+            glViewport(0, 0, textureWidth, textureHeight);
             glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
         }else{
             glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);

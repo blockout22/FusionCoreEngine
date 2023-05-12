@@ -24,7 +24,7 @@ public class CameraController {
     private DoubleBuffer xpos = BufferUtils.createDoubleBuffer(2);
     private  DoubleBuffer ypos = BufferUtils.createDoubleBuffer(1);
 
-    float SPEED = 1.1f;
+    public float SPEED = 1.1f;
 
     public CameraController(EulerCamera camera){
         this.camera = camera;

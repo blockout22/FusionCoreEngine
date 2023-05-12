@@ -40,7 +40,7 @@ public class EulerCamera {
         return forward.normalize();
     }
 
-    protected void createProjectionMatrix(int width, int height) {
+    public void createProjectionMatrix(int width, int height) {
         float aspectRatio = (float) width / (float) height;
         projectionMatrix = new Matrix4f();
         projectionMatrix.identity();

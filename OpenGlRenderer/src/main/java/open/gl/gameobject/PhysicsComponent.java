@@ -13,6 +13,7 @@ public class PhysicsComponent extends Component {
 
     private RigidBody rigidBody;
     private MeshInstance instance;
+    private boolean isBeingManipulated = false;
 
     public PhysicsComponent(RigidBody rigidBody, MeshInstance instance) {
         this.rigidBody = rigidBody;
@@ -20,14 +21,19 @@ public class PhysicsComponent extends Component {
         rigidBody.setUserPointer(this);
     }
 
+    public void setManipulate(boolean manipulate){
+        this.isBeingManipulated = manipulate;
+    }
+
     @Override
     public void update() {
-        rigidBody.getMotionState().getWorldTransform(transform);
+        if(!isBeingManipulated) {
+            rigidBody.getMotionState().getWorldTransform(transform);
+            instance.setPosition(PhysicsWorld.toJomlVector(transform.origin));
 
-        instance.setPosition(PhysicsWorld.toJomlVector(transform.origin));
-
-        transform.getRotation(quat);
-        instance.setRotation(quat.x, quat.y, quat.z, quat.w);
+            transform.getRotation(quat);
+            instance.setRotation(quat.x, quat.y, quat.z, quat.w);
+        }
     }
 
     public RigidBody getRigidBody() {
