@@ -1,6 +1,5 @@
 package open.gl.shaders;
 
-import com.fusion.core.engine.Debug;
 import open.gl.Utilities;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
@@ -11,6 +10,8 @@ import org.lwjgl.opengl.GL20;
 import java.io.*;
 import java.net.URL;
 import java.nio.FloatBuffer;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.lwjgl.opengl.GL20.glGetUniformLocation;
 
@@ -19,6 +20,8 @@ public abstract class OpenGlShader {
     private int program;
     private int vertex;
     private int fragment;
+
+    Map<String, Integer> uniformLocations = new HashMap<>();
 
     private static FloatBuffer matrixBuffer = BufferUtils.createFloatBuffer(4 * 4);
     private static FloatBuffer buffer = null;
@@ -60,11 +63,14 @@ public abstract class OpenGlShader {
     }
 
     public int getUniformLocation(String uniform){
-        int location = glGetUniformLocation(program, uniform);
-        if(location == -1){
-            System.out.println(uniform);
+        Integer location = uniformLocations.get(uniform);
+        if(location != null){
+            return uniformLocations.get(uniform);
         }
-        Debug.logInfo(location);
+        location = glGetUniformLocation(program, uniform);
+        if(location != -1){
+            uniformLocations.put(uniform, location);
+        }
         return location;
     }
 
