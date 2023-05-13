@@ -4,9 +4,10 @@ in vec3 aPos;
 in vec2 aTexCoord;
 in vec3 aNormal;
 
-uniform mat4 model;
-uniform mat4 view;
-uniform mat4 projection;
+#include "shaders/transformations.glsl"
+//uniform mat4 model;
+//uniform mat4 view;
+//uniform mat4 projection;
 uniform mat4 lightSpaceMatrix;
 
 out vec3 FragPos;

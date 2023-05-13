@@ -1,10 +1,10 @@
 #version 330 core
 
 in vec3 aPos;
-
-uniform mat4 model;
-uniform mat4 projection;
-uniform mat4 view;
+#include "shaders/transformations.glsl"
+//uniform mat4 model;
+//uniform mat4 projection;
+//uniform mat4 view;
 
 uniform mat4 lightSpaceMatrix;
 

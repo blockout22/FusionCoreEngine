@@ -53,7 +53,7 @@ void kernel(){
 
 void main()
 {
-    float depthValue = texture(screenTexture, TexCoord).r;
+//    float depthValue = texture(screenTexture, TexCoord).r;
     FragColor = texture(screenTexture, TexCoord);
 //    FragColor = vec4(vec3(depthValue), 1.0);
 

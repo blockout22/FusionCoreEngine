@@ -101,6 +101,30 @@ public abstract class OpenGlShader {
 
     private int loadShader(String fileName, int type) {
         StringBuilder sb = new StringBuilder();
+
+        sb.append(loadFile(fileName));
+
+        int shaderID = GL20.glCreateShader(type);
+        GL20.glShaderSource(shaderID, sb);
+        GL20.glCompileShader(shaderID);
+
+        if(GL20.glGetShaderi(shaderID, GL20.GL_COMPILE_STATUS) == GL11.GL_FALSE){
+            System.out.println("====================");
+            System.out.println(sb);
+            System.out.println("====================");
+            System.err.println("[" + fileName + "]");
+            System.err.println(GL20.glGetShaderInfoLog(shaderID));
+            String error = "Shader.class\n" + GL20.glGetShaderInfoLog(shaderID);
+            System.err.println(error);
+            throw new RuntimeException("Invalid Shader");
+        }
+
+
+        return shaderID;
+    }
+
+    private String loadFile(String fileName){
+        StringBuilder sb = new StringBuilder();
         BufferedReader br = null;
         File file = new File(fileName);
         try {
@@ -116,36 +140,26 @@ public abstract class OpenGlShader {
             }
         }catch (Exception e){
             e.printStackTrace();
-            return - 1;
+            return "";
         }
 
         try {
             String line;
             while ((line = br.readLine()) != null) {
-                sb.append(line).append("\n");
+                if(line.trim().startsWith("#include")){
+                    String includedFileName = line.trim().split("\"")[1];
+                    sb.append(loadFile(includedFileName));
+                }else {
+                    sb.append(line).append("\n");
+                }
             }
             br.close();
+
+            return sb.toString();
         }catch (Exception e){
             e.printStackTrace();
-            return -1;
+            return "";
         }
-
-        int shaderID = GL20.glCreateShader(type);
-        GL20.glShaderSource(shaderID, sb);
-        GL20.glCompileShader(shaderID);
-
-        if(GL20.glGetShaderi(shaderID, GL20.GL_COMPILE_STATUS) == GL11.GL_FALSE){
-            System.out.println("====================");
-            System.out.println(sb);
-            System.out.println("====================");
-            System.err.println("[" + fileName + "]");
-            System.err.println(GL20.glGetShaderInfoLog(shaderID));
-            String error = "Shader.class\n" + GL20.glGetShaderInfoLog(shaderID);
-            System.err.println(error);
-        }
-
-
-        return shaderID;
     }
 
     public void cleanup(){
