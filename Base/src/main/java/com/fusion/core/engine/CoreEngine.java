@@ -7,6 +7,7 @@ import com.fusion.core.engine.renderer.RendererReady;
 import com.fusion.core.engine.window.Window;
 import com.fusion.core.engine.window.WindowReady;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
 public abstract class CoreEngine {
@@ -20,6 +21,10 @@ public abstract class CoreEngine {
     public CoreEngine() {
         pluginManager = new PluginManager(this);
         pluginManager.loadPlugins();
+
+        if(!Global.getAssetDir().exists()){
+            Global.getAssetDir().mkdir();
+        }
     }
 
     public void addRendererReadyCallback(RendererReady onRendererReady){
