@@ -138,10 +138,10 @@ public class WorldShader extends OpenGlShader{
         loadVector3f(dirSpecular, light.specular);
     }
 
-    public void loadViewMatrix(Transform transform) {
-        Matrix4f matrix = createViewMatrix(transform);
-        loadMatrix4f(getView(), matrix);
-    }
+//    public void loadViewMatrix(Transform transform) {
+//        Matrix4f matrix = createViewMatrix(transform);
+//        loadMatrix4f(getView(), matrix);
+//    }
 
     public void loadViewMatrix(EulerCamera camera) {
         Matrix4f matrix = createEulerCameraViewMatrix(camera);
@@ -160,20 +160,20 @@ public class WorldShader extends OpenGlShader{
         return viewMatrix;
     }
 
-    private Matrix4f createViewMatrix(Transform transform) {
-        Matrix4f vm = new Matrix4f();
-        vm.identity();
-
-        Vector3f eulerAngles = transform.getRotationDeg();
-        vm.rotateX((float) Math.toRadians(eulerAngles.x), vm);
-        vm.rotateY((float) Math.toRadians(eulerAngles.y), vm);
-        vm.rotateZ((float) Math.toRadians(eulerAngles.z), vm);
-
-        Vector3f camPos = transform.getPosition();
-        Vector3f negCamPos = new Vector3f(-camPos.x, -camPos.y, -camPos.z);
-        vm.translate(negCamPos, vm);
-        return vm;
-    }
+//    private Matrix4f createViewMatrix(Transform transform) {
+//        Matrix4f vm = new Matrix4f();
+//        vm.identity();
+//
+//        Vector3f eulerAngles = transform.getRotationDeg();
+//        vm.rotateX((float) Math.toRadians(eulerAngles.x), vm);
+//        vm.rotateY((float) Math.toRadians(eulerAngles.y), vm);
+//        vm.rotateZ((float) Math.toRadians(eulerAngles.z), vm);
+//
+//        Vector3f camPos = transform.getPosition();
+//        Vector3f negCamPos = new Vector3f(-camPos.x, -camPos.y, -camPos.z);
+//        vm.translate(negCamPos, vm);
+//        return vm;
+//    }
 
 
 //    public void setViewPosition(Vector3f position){
