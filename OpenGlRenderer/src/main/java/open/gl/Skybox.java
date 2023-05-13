@@ -73,7 +73,7 @@ public class Skybox {
         glEnableVertexAttribArray(0);
     }
 
-    public void render(EulerCamera camera, DirLight light){
+    public void render(PerspectiveCamera camera, DirLight light){
         glDepthFunc(GL_LEQUAL);
         shader.bind();
 

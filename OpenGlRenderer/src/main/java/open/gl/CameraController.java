@@ -11,7 +11,7 @@ import java.nio.DoubleBuffer;
 
 public class CameraController {
 
-    private EulerCamera camera;
+    private PerspectiveCamera camera;
 
     private boolean mouseGrabbed = false;
 
@@ -26,7 +26,7 @@ public class CameraController {
 
     public float SPEED = 1.1f;
 
-    public CameraController(EulerCamera camera){
+    public CameraController(PerspectiveCamera camera){
         this.camera = camera;
     }
 

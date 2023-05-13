@@ -1,6 +1,6 @@
 package open.gl.shaders;
 
-import open.gl.EulerCamera;
+import open.gl.PerspectiveCamera;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
@@ -22,7 +22,7 @@ public class SkyboxShader extends OpenGlShader{
         view = getUniformLocation("view");
     }
 
-    public Matrix4f createViewMatrix(EulerCamera camera){
+    public Matrix4f createViewMatrix(PerspectiveCamera camera){
         viewMatrix.identity();
 
         viewMatrix.rotateX((float)Math.toRadians(camera.getPitch()), viewMatrix);

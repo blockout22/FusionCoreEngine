@@ -1,6 +1,6 @@
 package open.gl.debug;
 
-import open.gl.EulerCamera;
+import open.gl.PerspectiveCamera;
 import open.gl.OpenGlRenderer;
 import open.gl.Utilities;
 import open.gl.shaders.WorldShader;
@@ -98,7 +98,7 @@ public class DebugRenderer {
         DebugRenderer.shouldDepthTest = false;
     }
 
-    public static void render(WorldShader shader, EulerCamera camera){
+    public static void render(WorldShader shader, PerspectiveCamera camera){
         for(int i = 0; i < vaos.size(); i++){
             if(!DebugRenderer.shouldDepthTest){
                 glDisable(GL_DEPTH_TEST);

@@ -1,7 +1,6 @@
 package open.gl.shaders;
 
-import open.gl.EulerCamera;
-import open.gl.Transform;
+import open.gl.PerspectiveCamera;
 import open.gl.shaders.lights.DirLight;
 import open.gl.shaders.lights.PointLight;
 import open.gl.shaders.lights.SpotLight;
@@ -143,12 +142,12 @@ public class WorldShader extends OpenGlShader{
 //        loadMatrix4f(getView(), matrix);
 //    }
 
-    public void loadViewMatrix(EulerCamera camera) {
+    public void loadViewMatrix(PerspectiveCamera camera) {
         Matrix4f matrix = createEulerCameraViewMatrix(camera);
         loadMatrix4f(getView(), matrix);
     }
 
-    public Matrix4f createEulerCameraViewMatrix(EulerCamera camera){
+    public Matrix4f createEulerCameraViewMatrix(PerspectiveCamera camera){
         viewMatrix.identity();
 
         viewMatrix.rotateX((float)Math.toRadians(camera.getPitch()), viewMatrix);

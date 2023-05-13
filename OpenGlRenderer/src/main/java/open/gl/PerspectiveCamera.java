@@ -3,7 +3,7 @@ package open.gl;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
-public class EulerCamera {
+public class PerspectiveCamera {
 
     private Vector3f position = new Vector3f(0, 0, 0);
     protected float pitch = 0;
@@ -17,7 +17,7 @@ public class EulerCamera {
 
     private Matrix4f projectionMatrix;
 
-    public EulerCamera(int width, int height, float fov, float z_near, float z_far){
+    public PerspectiveCamera(int width, int height, float fov, float z_near, float z_far){
         this.FOV = fov;
         this.z_near = z_near;
         this.z_far = z_far;
