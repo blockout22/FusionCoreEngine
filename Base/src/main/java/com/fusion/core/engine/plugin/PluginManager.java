@@ -25,7 +25,7 @@ public class PluginManager {
     private CoreEngine core;
     private Map<String, Plugin> plugins = new HashMap();
 
-    private List<String> assetExtensions = Arrays.asList(".glsl", ".png", ".jpg", ".fbx");
+    private List<String> assetExtensions = Arrays.asList(".glsl", ".png", ".jpg", ".fbx", ".ttf");
 
     public PluginManager(CoreEngine core) {
         this.core = core;
