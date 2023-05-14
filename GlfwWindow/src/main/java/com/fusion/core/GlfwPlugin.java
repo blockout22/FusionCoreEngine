@@ -8,13 +8,14 @@ import com.fusion.core.engine.plugin.UnmodifiableString;
 import java.util.Collections;
 import java.util.List;
 
-public class GlfwPlugin implements Plugin {
+public class GlfwPlugin extends Plugin {
 
     private GlfwWindow window;
 
     @Override
-    public UnmodifiableString setId() {
-        return UnmodifiableString.fromString("GLFW");
+    public void setId() {
+        id.set("GLFW");
+//        return UnmodifiableString.fromString("GLFW");
     }
 
     @Override

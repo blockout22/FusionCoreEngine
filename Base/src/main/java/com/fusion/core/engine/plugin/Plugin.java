@@ -4,14 +4,22 @@ import com.fusion.core.engine.CoreEngine;
 
 import java.util.List;
 
-public interface Plugin {
+public abstract class Plugin {
 
-    UnmodifiableString id = new UnmodifiableString();
+    protected final UnmodifiableString id = new UnmodifiableString();
 
-    void init(CoreEngine coreEngine);
-    void update();
-    void shutdown();
-    UnmodifiableString setId();
+    public abstract void init(CoreEngine coreEngine);
+    public abstract void update();
+    public abstract void shutdown();
 
-    List<String> getDependencies();
+    /**
+     * requires call to id.set([value]) to work as expected
+     */
+    public abstract void setId();
+
+    public final String getId(){
+        return id.get();
+    }
+
+    public abstract List<String> getDependencies();
 }

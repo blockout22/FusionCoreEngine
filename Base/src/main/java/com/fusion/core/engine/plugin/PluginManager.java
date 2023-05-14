@@ -2,20 +2,30 @@ package com.fusion.core.engine.plugin;
 
 import com.fusion.core.engine.CoreEngine;
 import com.fusion.core.engine.Debug;
+import com.fusion.core.engine.Global;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.net.URLDecoder;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+import java.util.stream.Stream;
 
 public class PluginManager {
 
     private CoreEngine core;
     private Map<String, Plugin> plugins = new HashMap();
+
+    private List<String> assetExtensions = Arrays.asList(".glsl", ".png", ".jpg", ".fbx");
 
     public PluginManager(CoreEngine core) {
         this.core = core;
@@ -44,6 +54,33 @@ public class PluginManager {
         }
     }
 
+    private void extractAssets(Plugin plugin, String pluginId, String assetPath){
+        String filePath = pluginId + File.separator + assetPath;
+        InputStream in = plugin.getClass().getResourceAsStream("/" + assetPath);
+
+        if(in == null){
+            System.out.println("NULL ASSET PATH");
+        }else{
+            File destFile = new File(Global.getAssetDir().getAbsolutePath() + File.separator + filePath);
+
+            if(destFile.exists()){
+                return;
+            }
+
+            if(!destFile.getParentFile().exists()){
+                destFile.getParentFile().mkdirs();
+            }
+
+            Path dest = destFile.toPath();
+
+            try {
+                Files.copy(in, dest, StandardCopyOption.REPLACE_EXISTING);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
     public void loadPlugins(){
         File pluginDir = new File("Plugins");
         if(!pluginDir.exists()){
@@ -64,7 +101,7 @@ public class PluginManager {
                 try {
 //                    loadJarFile(pluginJar);
                     Plugin plugin = loadPlugin(pluginJar);
-                    String pluginId = plugin.setId().get();
+                    String pluginId = plugin.getId();
                     initCalled.put(pluginId, false);
                     plugins.put(pluginId, plugin);
 
@@ -98,6 +135,7 @@ public class PluginManager {
                     e.printStackTrace();
                 }
 
+                int initialSize = callbacks.size();
                 while (callbacks.size() > 0) {
                     for (int i = callbacks.size() - 1; i >= 0; i--) {
                         PluginLoadedCallback plc = callbacks.get(i);
@@ -121,6 +159,14 @@ public class PluginManager {
                             callbacks.remove(plc);
                         }
                     }
+
+                    //check if any progress was made loading the plugins
+                    if(callbacks.size() == initialSize){
+                        Debug.logError("Missing plugin dependencies");
+                        break;
+                    }
+
+                    initialSize = callbacks.size();
                 }
             }
         }
@@ -161,6 +207,9 @@ public class PluginManager {
     }
 
     private Plugin loadPlugin(File pluginJar){
+        Plugin plugin = null;
+        List<String> assets = new ArrayList<>();
+
         try{
             JarFile jarFile = new JarFile(pluginJar.getAbsolutePath().toString());
             Enumeration<JarEntry> entries = jarFile.entries();
@@ -173,10 +222,16 @@ public class PluginManager {
                     try {
                         Class<?> clazz = Class.forName(className, false, classLoader);
                         if (Plugin.class.isAssignableFrom(clazz)) {
-                            return (Plugin) clazz.getDeclaredConstructor().newInstance();
+                            plugin = (Plugin) clazz.getDeclaredConstructor().newInstance();
                         }
                     }catch (NoClassDefFoundError | UnsupportedClassVersionError e){
-                        e.printStackTrace();
+//                        e.printStackTrace();
+                    }
+                }else {
+                    for (String ext : assetExtensions) {
+                        if (entryName.endsWith(ext)) {
+                            assets.add(entryName);
+                        }
                     }
                 }
             }
@@ -185,8 +240,21 @@ public class PluginManager {
             e.printStackTrace();
         }
 
+        if(plugin == null){
+            plugin = createVirtualPlugin(pluginJar.getName());
+        }
+
+        if(plugin != null){
+            plugin.setId();
+        }
+
+        for (int i = 0; i < assets.size(); i++) {
+            System.out.println(assets.get(i));
+            extractAssets(plugin, plugin.getId(), assets.get(i));
+        }
+
 //        return null;
-        return createVirtualPlugin(pluginJar.getName());
+        return plugin;
     }
 
     private Plugin createVirtualPlugin(String jarName){
@@ -209,8 +277,9 @@ public class PluginManager {
             }
 
             @Override
-            public UnmodifiableString setId() {
-                return UnmodifiableString.fromString(pluginId);
+            public void setId() {
+                id.set(pluginId);
+//                return UnmodifiableString.fromString(pluginId);
             }
 
             @Override

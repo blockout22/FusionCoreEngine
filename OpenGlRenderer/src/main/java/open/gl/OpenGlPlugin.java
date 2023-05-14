@@ -9,13 +9,14 @@ import com.fusion.core.engine.window.Window;
 import java.util.Collections;
 import java.util.List;
 
-public class OpenGlPlugin implements Plugin {
+public class OpenGlPlugin extends Plugin {
 
     private OpenGlRenderer renderer;
 
     @Override
-    public UnmodifiableString setId() {
-        return UnmodifiableString.fromString("OpenGL");
+    public void setId() {
+        id.set("OpenGL");
+//        return UnmodifiableString.fromString("OpenGL");
     }
 
     @Override
