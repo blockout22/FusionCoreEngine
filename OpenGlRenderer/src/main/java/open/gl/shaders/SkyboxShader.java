@@ -25,14 +25,26 @@ public class SkyboxShader extends OpenGlShader{
     public Matrix4f createViewMatrix(PerspectiveCamera camera){
         viewMatrix.identity();
 
-        viewMatrix.rotateX((float)Math.toRadians(camera.getPitch()), viewMatrix);
-        viewMatrix.rotateY((float)Math.toRadians(camera.getYaw()), viewMatrix);
-        viewMatrix.rotateZ((float)Math.toRadians(camera.getRoll()), viewMatrix);
+        // Use the camera's orientation quaternion to create the rotation part of the view matrix
+        viewMatrix.rotate(camera.getOrientation());
+
         Vector3f camPos = camera.getPosition();
         negCamPos.set(-camPos.x, -camPos.y, - camPos.z);
         viewMatrix.translate(negCamPos, viewMatrix);
         return viewMatrix;
     }
+
+//    public Matrix4f createViewMatrix(PerspectiveCamera camera){
+//        viewMatrix.identity();
+//
+//        viewMatrix.rotateX((float)Math.toRadians(camera.getPitch()), viewMatrix);
+//        viewMatrix.rotateY((float)Math.toRadians(camera.getYaw()), viewMatrix);
+//        viewMatrix.rotateZ((float)Math.toRadians(camera.getRoll()), viewMatrix);
+//        Vector3f camPos = camera.getPosition();
+//        negCamPos.set(-camPos.x, -camPos.y, - camPos.z);
+//        viewMatrix.translate(negCamPos, viewMatrix);
+//        return viewMatrix;
+//    }
 
     public int getProjection() {
         return projection;
