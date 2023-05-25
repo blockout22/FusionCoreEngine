@@ -4,6 +4,7 @@ import open.gl.PerspectiveCamera;
 import open.gl.shaders.lights.DirLight;
 import open.gl.shaders.lights.PointLight;
 import open.gl.shaders.lights.SpotLight;
+import open.gl.shaders.material.Material;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
@@ -27,7 +28,7 @@ public class WorldShader extends OpenGlShader{
     private int depthMap, lightSpaceMatrix;
 
     //Materials
-    private int Material_diffuse, Material_specular, Material_shininess;
+//    private int Material_diffuse, Material_specular, Material_shininess;
 
     public WorldShader() {
 //        super("shaders/worldVertexShader.glsl", "shaders/worldFragmentShader.glsl");
@@ -73,9 +74,9 @@ public class WorldShader extends OpenGlShader{
         depthMap = getUniformLocation("depthMap");
         lightSpaceMatrix = getUniformLocation("lightSpaceMatrix");
 
-        Material_diffuse = getUniformLocation("material.diffuse");
-        Material_specular = getUniformLocation("material.specular");
-        Material_shininess = getUniformLocation("material.shininess");
+//        Material_diffuse = getUniformLocation("material.diffuse");
+//        Material_specular = getUniformLocation("material.specular");
+//        Material_shininess = getUniformLocation("material.shininess");
     }
 
     public void updateDepthMap(int map){
@@ -86,11 +87,9 @@ public class WorldShader extends OpenGlShader{
         loadMatrix4f(lightSpaceMatrix, matrix);
     }
 
-    public void updateMaterial(Material material){
-        loadInt(Material_diffuse, 0);
-        loadInt(Material_specular, 1);
-        loadFloat(Material_shininess, material.shininess);
-    }
+//    public void updateMaterial(Material material){
+//
+//    }
 
     public void setNumberOfLight(int pointLights, int spotLights) {
         loadInt(numPointLights, pointLights);

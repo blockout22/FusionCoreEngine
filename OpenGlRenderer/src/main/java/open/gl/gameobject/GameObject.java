@@ -64,7 +64,7 @@ public class GameObject {
             for(MeshInstance instance : instances){
                 OpenGlRenderer.addTriangleCount(instance.getMesh().getModel().getTriangleCount());
                 shader.loadMatrix4f(shader.getUniformLocation(modelMatrix), mesh.createTransformationMatrix(instance));
-                mesh.render(instance);
+                mesh.render(instance, false);
             }
             mesh.disable();
         }

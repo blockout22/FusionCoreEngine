@@ -1,22 +1,16 @@
 package open.gl.gameobject;
 
 import open.gl.Transform;
-import open.gl.shaders.Material;
+import open.gl.shaders.material.Material;
 
 public class MeshInstance extends Transform {
 
     private final Mesh mesh;
-    public Material material = new Material();
+    public Material material;
 
-    public MeshInstance(Mesh mesh){
+    public MeshInstance(Mesh mesh, Material material){
         this.mesh = mesh;
-        if(mesh.getModel().getDiffuseTexture() != null) {
-            material.diffuse = mesh.getModel().getDiffuseTexture().getID();
-        }
-
-        if(mesh.getModel().getSpecularTexture() != null){
-            material.specular = mesh.getModel().getSpecularTexture().getID();
-        }
+        this.material = material;
     }
 
     public Mesh getMesh() {

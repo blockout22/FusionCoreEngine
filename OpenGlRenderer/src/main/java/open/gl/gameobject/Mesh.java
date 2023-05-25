@@ -96,11 +96,11 @@ public class Mesh {
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vboi);
     }
 
-    public void render(MeshInstance instance){
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, instance.material.diffuse);
-        glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, instance.material.specular);
+    public void render(MeshInstance instance, boolean disableMaterial){
+        if(!disableMaterial) {
+            instance.material.bind();
+        }
+
         if(wireframeMode) {
             glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
             OpenGlRenderer.addDrawCall();
