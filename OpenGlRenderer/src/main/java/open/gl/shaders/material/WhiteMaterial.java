@@ -13,7 +13,7 @@ import static org.lwjgl.opengl.GL13.*;
 public class WhiteMaterial extends Material{
 
     public int diffuse = TextureLoader.loadTexture(Global.getAssetDir().toString() + File.separator + "OpenGL" + File.separator + "white.png").getID();
-    public int specular = TextureLoader.loadTexture(Global.getAssetDir().toString() + File.separator + "OpenGL" + File.separator + "container2_specular.png").getID();
+    public int specular = 1;//TextureLoader.loadTexture(Global.getAssetDir().toString() + File.separator + "OpenGL" + File.separator + "container2_specular.png").getID();
     public float shininess = 0f;
 
     public WhiteMaterial(OpenGlShader shader) {

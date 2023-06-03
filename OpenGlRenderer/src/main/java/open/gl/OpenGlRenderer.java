@@ -70,6 +70,28 @@ public class OpenGlRenderer extends Renderer {
         gameObjects.add(gameObject);
     }
 
+    public void render(OpenGlShader shader, MeshInstance instance, WhileRendering whileRendering){
+        whileRendering.ShaderBeforeBind();
+        shader.bind();
+        {
+            whileRendering.ShaderAfterBind();
+
+                    Mesh mesh = instance.getMesh();
+                    whileRendering.MeshBeforeBind(mesh);
+                    mesh.enable();
+                    whileRendering.MeshAfterBind(mesh);
+                        whileRendering.MeshInstanceUpdate(mesh, instance);
+                        drawCall++;
+                        mesh.render(instance, instance.material.getShader() != shader);
+                    whileRendering.MeshBeforeUnbind(mesh);
+                    mesh.disable();
+                    whileRendering.MeshAfterUnbind(mesh);
+        }
+        whileRendering.ShaderBeforeUnbind();
+        shader.unbind();
+        whileRendering.ShaderAfterUnbind();
+    }
+
     public void render(OpenGlShader shader, Map<Mesh, List<MeshInstance>> instances, WhileRendering whileRendering){
         whileRendering.ShaderBeforeBind();
         shader.bind();
@@ -92,6 +114,17 @@ public class OpenGlRenderer extends Renderer {
                     whileRendering.MeshAfterUnbind(mesh);
                 }
             }
+        }
+        whileRendering.ShaderBeforeUnbind();
+        shader.unbind();
+        whileRendering.ShaderAfterUnbind();
+    }
+
+    public void render(OpenGlShader shader, WhileRendering whileRendering){
+        whileRendering.ShaderBeforeBind();
+        shader.bind();
+        {
+            whileRendering.ShaderAfterBind();
         }
         whileRendering.ShaderBeforeUnbind();
         shader.unbind();

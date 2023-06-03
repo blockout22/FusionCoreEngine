@@ -70,6 +70,7 @@ public class PhysicsWorld {
             CollisionObject hitObject = rayCallback.collisionObject;
             PhysicsComponent hitPhysicsComponent = (PhysicsComponent) hitObject.getUserPointer();
             hitResults.hitComponent = hitPhysicsComponent;
+            hitResults.hitNormal = toJomlVector(rayCallback.hitNormalWorld);
         }else{
             hitResults.hitComponent = null;
         }

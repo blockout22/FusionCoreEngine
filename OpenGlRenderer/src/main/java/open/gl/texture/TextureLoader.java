@@ -11,6 +11,11 @@ public class TextureLoader {
 
     public static HashMap<String, Texture> texturePool = new HashMap<>();
 
+    /**
+     * Textures will be automatically disposed of by the OpenGlRenderer on close
+     * @param textureFile
+     * @return
+     */
     public static Texture loadTexture(String textureFile) {
         Texture pool = texturePool.get(textureFile);
 

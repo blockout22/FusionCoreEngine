@@ -1,5 +1,6 @@
 package com.fusion.core;
 
+import com.fusion.core.engine.Debug;
 import com.fusion.core.engine.window.Window;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.glfw.GLFWVidMode;
@@ -10,6 +11,7 @@ import java.nio.DoubleBuffer;
 import java.nio.IntBuffer;
 
 import static org.lwjgl.glfw.GLFW.*;
+import static org.lwjgl.glfw.GLFWVulkan.glfwVulkanSupported;
 import static org.lwjgl.system.MemoryStack.*;
 import static org.lwjgl.system.MemoryUtil.*;
 
@@ -29,9 +31,18 @@ public class GlfwWindow extends Window {
             throw new IllegalStateException("Unable to initialize GLFW");
         }
 
+        if(!glfwVulkanSupported())
+        {
+            Debug.logWarn("Vulkan isn't supported");
+        }
+
         glfwDefaultWindowHints();
         glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
         glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
+        //vulkan setup
+//        glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+
+
 //        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 //        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 //        glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);

@@ -3,6 +3,7 @@ package open.gl.debug;
 import open.gl.PerspectiveCamera;
 import open.gl.OpenGlRenderer;
 import open.gl.Utilities;
+import open.gl.shaders.DebugShader;
 import open.gl.shaders.WorldShader;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
@@ -98,7 +99,7 @@ public class DebugRenderer {
         DebugRenderer.shouldDepthTest = false;
     }
 
-    public static void render(WorldShader shader, PerspectiveCamera camera){
+    public static void render(DebugShader shader, PerspectiveCamera camera){
         for(int i = 0; i < vaos.size(); i++){
             if(!DebugRenderer.shouldDepthTest){
                 glDisable(GL_DEPTH_TEST);
