@@ -30,6 +30,8 @@ public class WorldShader extends OpenGlShader{
     //Materials
 //    private int Material_diffuse, Material_specular, Material_shininess;
 
+    private boolean isUnlit = false;
+
     public WorldShader() {
 //        super("shaders/worldVertexShader.glsl", "shaders/worldFragmentShader.glsl");
         super("shaders/worldVertexShader.glsl", "shaders/LightingFragment.glsl");
@@ -77,6 +79,17 @@ public class WorldShader extends OpenGlShader{
 //        Material_diffuse = getUniformLocation("material.diffuse");
 //        Material_specular = getUniformLocation("material.specular");
 //        Material_shininess = getUniformLocation("material.shininess");
+    }
+
+    public void setUnlit(boolean unlit){
+        int val = unlit ? 1 : 0;
+        System.out.println(val);
+        loadInt(getUniformLocation("unlit"), val);
+        isUnlit = unlit;
+    }
+
+    public void toggleUnlit(){
+        setUnlit(!isUnlit);
     }
 
     public void updateDepthMap(int map){
