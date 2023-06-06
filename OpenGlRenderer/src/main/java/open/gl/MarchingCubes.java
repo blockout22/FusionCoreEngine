@@ -7,7 +7,7 @@ public class MarchingCubes {
 
     private long startTime;
     public long timeTaken = 0;
-    private int[][][] scalarField;
+    private float[][][] scalarField;
     float threshold = 0.5f;
     public List<Vector3f> vertices = new ArrayList<>();
     public List<Vector3f> normals = new ArrayList<>();
@@ -26,14 +26,14 @@ public class MarchingCubes {
             {0, 1, 1}
     };
 
-    public MarchingCubes(int[][][] scalarField) {
+    public MarchingCubes(float[][][] scalarField) {
         startTime = System.currentTimeMillis();
         this.scalarField = scalarField;
 
         for (int x = 0; x < scalarField.length - 1; x++) {
             for (int y = 0; y < scalarField[0].length - 1; y++) {
                 for (int z = 0; z < scalarField[0][0].length - 1; z++) {
-                    int[] corners = new int[8];
+                    float[] corners = new float[8];
                     corners[0] = scalarField[x + 0][y + 0][z + 0];
                     corners[1] = scalarField[x + 1][y + 0][z + 0];
                     corners[2] = scalarField[x + 1][y + 0][z + 1];
@@ -101,6 +101,51 @@ public class MarchingCubes {
         }
         timeTaken = System.currentTimeMillis() - startTime;
     }
+
+    public static float[][][] generateClouds(int size, float blobHeight, float blobWidth, float blobDepth, int numBlobs, float cloudThreshold) {
+        float[][][] scalarField = new float[size][size][size];
+
+        Random rand = new Random();
+
+        // Create a number of "blobs" within the scalar field
+        for (int i = 0; i < numBlobs; i++) {
+            // Randomly position the center of the blob
+            int blobX = rand.nextInt(size);
+            int blobY = rand.nextInt(size);
+            int blobZ = rand.nextInt(size);
+
+            // Fill in the scalar field with the density function
+            for (int x = 0; x < size; x++) {
+                for (int y = 0; y < size; y++) {
+                    for (int z = 0; z < size; z++) {
+                        // Calculate the density at this point (an ellipsoid)
+                        float dx = (x - blobX) / blobWidth;
+                        float dy = (y - blobY) / blobHeight;
+                        float dz = (z - blobZ) / blobDepth;
+                        float distanceSquared = dx*dx + dy*dy + dz*dz;
+                        float density = 1 / (distanceSquared + 0.001f);  // Add a small constant to avoid division by zero
+                        scalarField[x][y][z] += density;
+                    }
+                }
+            }
+        }
+
+        // Apply the cloud threshold
+        for (int x = 0; x < size; x++) {
+            for (int y = 0; y < size; y++) {
+                for (int z = 0; z < size; z++) {
+                    if (scalarField[x][y][z] > cloudThreshold) {
+                        scalarField[x][y][z] = 0;
+                    } else {
+                        scalarField[x][y][z] = 1;  // Not a cloud
+                    }
+                }
+            }
+        }
+
+        return scalarField;
+    }
+
 
 //    private Vector3f interpolate(int x1, int y1, int z1, int value1, int x2, int y2, int z2, int value2) {
 //        // If the value equals the threshold at any of the points, return that point
