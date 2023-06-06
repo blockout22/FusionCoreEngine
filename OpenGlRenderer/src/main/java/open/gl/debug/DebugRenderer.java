@@ -4,7 +4,6 @@ import open.gl.PerspectiveCamera;
 import open.gl.OpenGlRenderer;
 import open.gl.Utilities;
 import open.gl.shaders.DebugShader;
-import open.gl.shaders.WorldShader;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
@@ -28,7 +27,7 @@ public class DebugRenderer {
 
     }
 
-    public static DebugInstance add(Vector3f start, Vector3f end){
+    public static DebugInstance drawLine(Vector3f start, Vector3f end){
 
         DebugInstance instance = new DebugInstance();
         int vao = glGenVertexArrays();
@@ -65,28 +64,28 @@ public class DebugRenderer {
         return instance;
     }
 
-    public static DebugInstance[] addCubeRender(Vector3f min, Vector3f max){
+    public static DebugInstance[] drawCube(Vector3f min, Vector3f max){
 
         int i = 0;
         DebugInstance[] instanceList = new DebugInstance[12];
 
         //front face
-        instanceList[i++] = DebugRenderer.add(new Vector3f(min.x, max.y, min.z), new Vector3f(max.x, max.y, min.z));
-        instanceList[i++] = DebugRenderer.add(new Vector3f(max.x, max.y, min.z), new Vector3f(max.x, min.y, min.z));
-        instanceList[i++] = DebugRenderer.add(new Vector3f(max.x, min.y, min.z), new Vector3f(min.x, min.y, min.z));
-        instanceList[i++] = DebugRenderer.add(new Vector3f(min.x, min.y, min.z), new Vector3f(min.x, max.y, min.z));
+        instanceList[i++] = DebugRenderer.drawLine(new Vector3f(min.x, max.y, min.z), new Vector3f(max.x, max.y, min.z));
+        instanceList[i++] = DebugRenderer.drawLine(new Vector3f(max.x, max.y, min.z), new Vector3f(max.x, min.y, min.z));
+        instanceList[i++] = DebugRenderer.drawLine(new Vector3f(max.x, min.y, min.z), new Vector3f(min.x, min.y, min.z));
+        instanceList[i++] = DebugRenderer.drawLine(new Vector3f(min.x, min.y, min.z), new Vector3f(min.x, max.y, min.z));
 
         //back face
-        instanceList[i++] = DebugRenderer.add(new Vector3f(min.x, max.y, max.z), new Vector3f(max.x, max.y, max.z));
-        instanceList[i++] = DebugRenderer.add(new Vector3f(max.x, max.y, max.z), new Vector3f(max.x, min.y, max.z));
-        instanceList[i++] = DebugRenderer.add(new Vector3f(max.x, min.y, max.z), new Vector3f(min.x, min.y, max.z));
-        instanceList[i++] = DebugRenderer.add(new Vector3f(min.x, min.y, max.z), new Vector3f(min.x, max.y, max.z));
+        instanceList[i++] = DebugRenderer.drawLine(new Vector3f(min.x, max.y, max.z), new Vector3f(max.x, max.y, max.z));
+        instanceList[i++] = DebugRenderer.drawLine(new Vector3f(max.x, max.y, max.z), new Vector3f(max.x, min.y, max.z));
+        instanceList[i++] = DebugRenderer.drawLine(new Vector3f(max.x, min.y, max.z), new Vector3f(min.x, min.y, max.z));
+        instanceList[i++] = DebugRenderer.drawLine(new Vector3f(min.x, min.y, max.z), new Vector3f(min.x, max.y, max.z));
 
         //sides
-        instanceList[i++] = DebugRenderer.add(new Vector3f(max.x, max.y, min.z), new Vector3f(max.x, max.y, max.z));
-        instanceList[i++] = DebugRenderer.add(new Vector3f(max.x, min.y, min.z), new Vector3f(max.x, min.y, max.z));
-        instanceList[i++] = DebugRenderer.add(new Vector3f(min.x, max.y, min.z), new Vector3f(min.x, max.y, max.z));
-        instanceList[i++] = DebugRenderer.add(new Vector3f(min.x, min.y, min.z), new Vector3f(min.x, min.y, max.z));
+        instanceList[i++] = DebugRenderer.drawLine(new Vector3f(max.x, max.y, min.z), new Vector3f(max.x, max.y, max.z));
+        instanceList[i++] = DebugRenderer.drawLine(new Vector3f(max.x, min.y, min.z), new Vector3f(max.x, min.y, max.z));
+        instanceList[i++] = DebugRenderer.drawLine(new Vector3f(min.x, max.y, min.z), new Vector3f(min.x, max.y, max.z));
+        instanceList[i++] = DebugRenderer.drawLine(new Vector3f(min.x, min.y, min.z), new Vector3f(min.x, min.y, max.z));
 
         return instanceList;
     }

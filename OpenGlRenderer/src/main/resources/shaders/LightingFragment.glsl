@@ -154,5 +154,11 @@ void main(){
 //    vec3 result = ambient + diffuse + specular * color;
     FragColor = vec4(lighting, 1.0);
 
+    //a way to view normals of the objects
+//    FragColor = vec4(normalize(Normal) * 0.5 + 0.5, 1.0);
+
+    //show only diffuse and ambient of models
+//    FragColor = vec4(color * vec3(texture(material.diffuse, TexCoords)), 1.0);
+
     setGamma(gamma);
 }

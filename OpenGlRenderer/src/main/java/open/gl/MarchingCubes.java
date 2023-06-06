@@ -48,8 +48,6 @@ public class MarchingCubes {
                         if (corners[i] < threshold) binaryState |= 1 << i;
                     }
 
-//                    System.out.println("binary state: " + binaryState);
-
                     /* Create the triangle */
                     int[] edgeIndices = MarchingCubesTables.triTable[binaryState];
                     for (int i = 0; i < 16; i += 3) {
@@ -72,14 +70,12 @@ public class MarchingCubes {
                             Vector3f vertex = new Vector3f();
                             vertex = point1.lerp(point2, t, vertex);
 
-//                            String key = vertex.x + "," + vertex.y + "," + vertex.z;
                             Vector3f key = vertex;
                             if (!vertexMap.containsKey(key)) {
                                 vertices.add(vertex);
                                 vertexMap.put(key, vertices.size() - 1);
                             }
                             triangle[j] = vertexMap.get(key);
-//                            vertices.add(vertex);
                         }
                         int baseIndex = vertices.size() - 3;
                         indices.add(triangle[0]);
@@ -103,7 +99,6 @@ public class MarchingCubes {
                 }
             }
         }
-
         timeTaken = System.currentTimeMillis() - startTime;
     }
 
