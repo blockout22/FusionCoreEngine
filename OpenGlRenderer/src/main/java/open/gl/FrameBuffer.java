@@ -37,8 +37,8 @@ public class FrameBuffer {
     public FrameBuffer(int width, int height, int textureWidth, int textureHeight, boolean depthOnly) {
         this.textureWidth = textureWidth;
         this.textureHeight = textureHeight;
+        this.depthOnly = depthOnly;
         if(!depthOnly) {
-            this.depthOnly = depthOnly;
             frameBuffer = glGenFramebuffers();
             rbo = glGenRenderbuffers();
 
@@ -56,6 +56,7 @@ public class FrameBuffer {
             glBindTexture(GL_TEXTURE_2D, 0);
 
             //bind texture to frame buffer
+            //Create Render Buffer
             glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureColorbuffer, 0);
             glBindRenderbuffer(GL_RENDERBUFFER, rbo);
             glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
@@ -67,8 +68,8 @@ public class FrameBuffer {
             glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, textureWidth, textureHeight, 0 , GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
             depthMapFBO = glGenFramebuffers();
             glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
@@ -83,10 +84,6 @@ public class FrameBuffer {
 //            glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
             glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo);
         }
-
-        //Create Render Buffer
-
-
 
         //check if Frame buffer successfully completed
         if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE){
