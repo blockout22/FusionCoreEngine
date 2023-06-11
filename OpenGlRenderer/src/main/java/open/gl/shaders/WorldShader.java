@@ -147,6 +147,10 @@ public class WorldShader extends OpenGlShader{
         loadVector3f(dirAmbient, light.ambient);
         loadVector3f(dirDiffuse, light.diffuse);
         loadVector3f(dirSpecular, light.specular);
+
+        loadFloat(getUniformLocation("constant"), light.constant);
+        loadFloat(getUniformLocation("linear"), light.linear);
+        loadFloat(getUniformLocation("quadratic"), light.quadratic);
     }
 
 //    public void loadViewMatrix(Transform transform) {

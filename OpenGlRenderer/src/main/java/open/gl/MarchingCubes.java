@@ -8,7 +8,6 @@ public class MarchingCubes {
     private long startTime;
     public long timeTaken = 0;
     private float[][][] scalarField;
-    float threshold = 0.5f;
     public List<Vector3f> vertices = new ArrayList<>();
     public List<Vector3f> normals = new ArrayList<>();
     public List<Integer> indices = new ArrayList<>();
@@ -26,7 +25,11 @@ public class MarchingCubes {
             {0, 1, 1}
     };
 
-    public MarchingCubes(float[][][] scalarField) {
+    public MarchingCubes(float[][][] scalarField){
+        this(scalarField, 0.5f);
+    }
+
+    public MarchingCubes(float[][][] scalarField, float threshold) {
         startTime = System.currentTimeMillis();
         this.scalarField = scalarField;
 
@@ -64,7 +67,7 @@ public class MarchingCubes {
                             int[] vertex1 = cornerTable[edge[1]];
 
                             // Interpolation step (simplified)
-                            float t = (float) (threshold - corners[edge[0]]) / (corners[edge[1]] - corners[edge[0]]);
+                            float t = (threshold - corners[edge[0]]) / (corners[edge[1]] - corners[edge[0]]);
                             Vector3f point1 = new Vector3f(x + vertex0[0], y + vertex0[1], z + vertex0[2]);
                             Vector3f point2 = new Vector3f(x + vertex1[0], y + vertex1[1], z + vertex1[2]);
                             Vector3f vertex = new Vector3f();
@@ -88,17 +91,31 @@ public class MarchingCubes {
 
                         Vector3f v2 = new Vector3f(vertices.get(triangle[2]));
                         Vector3f edge2 = v2.sub(v0);  // create edge from v2 to v0
-
+//
                         Vector3f normal = edge1.cross(edge2);
                         normals.add(normal);
-
-//                        indices.add(baseIndex + 0);
-//                        indices.add(baseIndex + 1);
-//                        indices.add(baseIndex + 2);
                     }
                 }
             }
         }
+
+//        for (int i = 0; i < vertices.size(); i++) {
+//            normals.add(new Vector3f(0));
+//        }
+//
+//        for (int i = 0; i < indices.size(); i+= 3) {
+//            Vector3f v1 = vertices.get(indices.get(i));
+//            Vector3f v2 = vertices.get(indices.get(i + 1));
+//            Vector3f v3 = vertices.get(indices.get(i + 2));
+//
+//            Vector3f edge1 = v2.sub(v1, new Vector3f());
+//            Vector3f edge2 = v3.sub(v1, new Vector3f());
+//            Vector3f normal = edge1.cross(edge2, new Vector3f());
+//
+//            normals.get(indices.get(i)).set(normal);
+//            normals.get(indices.get(i + 1)).set(normal);
+//            normals.get(indices.get(i + 2)).set(normal);
+//        }
         timeTaken = System.currentTimeMillis() - startTime;
     }
 
@@ -145,26 +162,4 @@ public class MarchingCubes {
 
         return scalarField;
     }
-
-
-//    private Vector3f interpolate(int x1, int y1, int z1, int value1, int x2, int y2, int z2, int value2) {
-//        // If the value equals the threshold at any of the points, return that point
-//        if (Math.abs(threshold - value1) < 0.00001f) {
-//            return new Vector3f(x1, y1, z1);
-//        }
-//        if (Math.abs(threshold - value2) < 0.00001f) {
-//            return new Vector3f(x2, y2, z2);
-//        }
-//        if (Math.abs(value1 - value2) < 0.00001f) {
-//            return new Vector3f(x1, y1, z1);
-//        }
-//
-//        // Else, linearly interpolate the position of the point
-//        float mu = (threshold - value1) / (value2 - value1);
-//        float x = x1 + mu * (x2 - x1);
-//        float y = y1 + mu * (y2 - y1);
-//        float z = z1 + mu * (z2 - z1);
-//
-//        return new Vector3f(x, y, z);
-//    }
 }

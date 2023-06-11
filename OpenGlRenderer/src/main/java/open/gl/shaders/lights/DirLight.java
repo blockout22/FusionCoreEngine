@@ -9,6 +9,10 @@ public class DirLight {
     public Vector3f ambient = new Vector3f(0.05f, 0.05f, 0.05f);
     public Vector3f diffuse = new Vector3f(0.4f, 0.4f, 0.4f);
     public Vector3f specular = new Vector3f(0.5f, 0.5f, 0.5f);
+
+    public float constant = 1.0f;
+    public float linear = 0.09f;
+    public float quadratic = 0.032f;
     private Matrix4f lightProjection = new Matrix4f();
 
     public void updateDirection(Vector3f newDirection) {

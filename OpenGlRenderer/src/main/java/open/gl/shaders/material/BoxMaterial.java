@@ -14,7 +14,7 @@ public class BoxMaterial extends Material{
 
     public int diffuse = TextureLoader.loadTexture(Global.getAssetDir().toString() + File.separator + "OpenGL" + File.separator + "container2.png").getID();
     public int specular = 1;
-    public float shininess = 0f;
+    public float shininess = 64f;
 
     public BoxMaterial(OpenGlShader shader) {
         super(shader);
