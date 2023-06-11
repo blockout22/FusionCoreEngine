@@ -125,8 +125,10 @@ float shadowC(float dotLightNormal){
         pos.z = 1.0;
     }
     float depth = texture(shadowMap, pos.xy).r;
-    float bias = max(0.005 * (1.0 - dotLightNormal), 0.0005);
-
+    //good for 16384x16384 res
+    float bias = max(0.0001 * (1.0 - dotLightNormal), 0.00001);
+    //good for 1080x1080 res
+//    float bias = max(0.005 * (1.0 - dotLightNormal), 0.0005);
     float shadow = 0.0;
     vec2 texelSize = 1.0 / textureSize(shadowMap, 0);
     for(int x = -1; x <= 1; ++x){
