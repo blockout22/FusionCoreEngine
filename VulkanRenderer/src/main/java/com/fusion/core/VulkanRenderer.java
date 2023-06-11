@@ -4,22 +4,16 @@ import com.fusion.core.engine.Debug;
 import com.fusion.core.engine.renderer.Renderer;
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.system.MemoryStack;
-import org.lwjgl.system.Pointer;
 import org.lwjgl.vulkan.*;
 
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.nio.LongBuffer;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.stream.Collectors;
 
-import static java.util.stream.Collectors.toSet;
 import static org.lwjgl.glfw.GLFWVulkan.*;
 import static org.lwjgl.system.MemoryStack.*;
 import static org.lwjgl.system.MemoryUtil.*;
 import static org.lwjgl.vulkan.EXTDebugUtils.*;
-import static org.lwjgl.vulkan.KHRSurface.vkDestroySurfaceKHR;
 import static org.lwjgl.vulkan.KHRSwapchain.VK_KHR_SWAPCHAIN_EXTENSION_NAME;
 import static org.lwjgl.vulkan.VK10.*;
 
@@ -31,6 +25,7 @@ public class VulkanRenderer extends Renderer {
     private VkPhysicalDevice physicalDevice;
     private VkDevice device;
     private VkQueue graphicsQueue;
+    private int graphics_queue_node_index;
 
     private final IntBuffer     ip = memAllocInt(1);
     private final LongBuffer lp = memAllocLong(1);
@@ -51,6 +46,7 @@ public class VulkanRenderer extends Renderer {
     public void init() {
         Debug.logInfo("Creating Vulkan instance");
         craeteInstance();
+        createDevice();
     }
 
     private final VkDebugUtilsMessengerCallbackEXT dbgFunc = VkDebugUtilsMessengerCallbackEXT.create(
@@ -97,6 +93,35 @@ public class VulkanRenderer extends Renderer {
             }
     );
 
+    private void createDevice(){
+        try(MemoryStack stack = stackPush()){
+            VkDeviceQueueCreateInfo.Buffer queue = VkDeviceQueueCreateInfo.malloc(1, stack)
+                    .sType$Default()
+                    .pNext(NULL)
+                    .flags(0)
+                    .queueFamilyIndex(graphics_queue_node_index)
+                    .pQueuePriorities(stack.floats(0.0f));
+
+            VkPhysicalDeviceFeatures features = VkPhysicalDeviceFeatures.calloc(stack);
+            if(gpu_features.shaderClipDistance()){
+                features.shaderClipDistance(true);
+            }
+            extension_names.flip();
+            VkDeviceCreateInfo device = VkDeviceCreateInfo.malloc(stack)
+                    .sType$Default()
+                    .pNext(NULL)
+                    .flags(0)
+                    .pQueueCreateInfos(queue)
+                    .ppEnabledLayerNames(null)
+                    .ppEnabledExtensionNames(extension_names)
+                    .pEnabledFeatures(features);
+
+            check(vkCreateDevice(gpu, device, null, pp));
+
+            this.device = new VkDevice(pp.get(0), gpu, device);
+        }
+    }
+
     private static void check(int errcode) {
         if (errcode != 0) {
             throw new IllegalStateException(String.format("Vulkan error [0x%X]", errcode));
@@ -115,21 +140,21 @@ public class VulkanRenderer extends Renderer {
                 check(vkEnumerateInstanceLayerProperties(ip, availableLayers));
                 if (ip.get(0) > 0) {
 
-                    requiredLayers = demo_check_layers(
+                    requiredLayers = checkLayers(
                             stack, availableLayers,
                             "VK_LAYER_KHRONOS_validation"/*,
                         "VK_LAYER_LUNARG_assistant_layer"*/
                     );
 
                     if (requiredLayers == null) { // use alternative (deprecated) set of validation layers
-                        requiredLayers = demo_check_layers(
+                        requiredLayers = checkLayers(
                                 stack, availableLayers,
                                 "VK_LAYER_LUNARG_standard_validation"/*,
                             "VK_LAYER_LUNARG_assistant_layer"*/
                         );
                     }
                     if (requiredLayers == null) { // use alternative (deprecated) set of validation layers
-                        requiredLayers = demo_check_layers(
+                        requiredLayers = checkLayers(
                                 stack, availableLayers,
                                 "VK_LAYER_GOOGLE_threading",
                                 "VK_LAYER_LUNARG_parameter_validation",
@@ -301,7 +326,7 @@ public class VulkanRenderer extends Renderer {
         }
     }
 
-    private static PointerBuffer demo_check_layers(MemoryStack stack, VkLayerProperties.Buffer available, String... layers) {
+    private static PointerBuffer checkLayers(MemoryStack stack, VkLayerProperties.Buffer available, String... layers) {
         PointerBuffer required = stack.mallocPointer(layers.length);
         for (int i = 0; i < layers.length; i++) {
             boolean found = false;
@@ -351,6 +376,7 @@ public class VulkanRenderer extends Renderer {
         if(msg_callback != NULL){
             vkDestroyDebugUtilsMessengerEXT(instance, msg_callback, null);
         }
+        vkDestroyDevice(device, null);
         vkDestroyInstance(instance, null);
         dbgFunc.free();
 
