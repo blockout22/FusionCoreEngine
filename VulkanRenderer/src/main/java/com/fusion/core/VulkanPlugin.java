@@ -4,6 +4,7 @@ import com.fusion.core.engine.CoreEngine;
 import com.fusion.core.engine.Debug;
 import com.fusion.core.engine.plugin.Plugin;
 import com.fusion.core.engine.plugin.UnmodifiableString;
+import com.fusion.core.engine.window.WindowReady;
 
 import java.util.List;
 
@@ -21,8 +22,11 @@ public class VulkanPlugin extends Plugin {
     public void init(CoreEngine coreEngine) {
         Debug.logInfo("Vulkan Rendering Plugin init");
 
-        renderer = new VulkanRenderer();
-        coreEngine.setRenderer(renderer);
+        coreEngine.addWindowReadyCallback(() -> {
+            renderer = new VulkanRenderer((GlfwWindow) coreEngine.getWindow());
+            coreEngine.setRenderer(renderer);
+
+        });
     }
 
     @Override
