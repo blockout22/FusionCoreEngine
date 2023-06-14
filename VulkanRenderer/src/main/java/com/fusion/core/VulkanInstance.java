@@ -19,7 +19,8 @@ import static org.lwjgl.vulkan.VK10.*;
 
 public class VulkanInstance {
 
-    private static final boolean VALIDATE = true;
+    //this should get disabled when not in development mode
+    private static boolean VALIDATE = true;
 
     private VkInstance instance;
 
@@ -81,7 +82,10 @@ public class VulkanInstance {
 
                 }
                 if (requiredLayers == null) {
-                    throw new IllegalStateException("vkEnumerateInstanceLayerProperties failed to find required validation layer.");
+                    VALIDATE = false;
+                    Debug.logError("vkEnumerateInstanceLayerProperties failed to find required validation layer. Continuing without validation layers may make it harder to diagnose issues with the Vulkan API usage. \" +\n" +
+                            "                       \"It is highly recommended to install the Vulkan SDK which provides these validation layers for debugging. ");
+//                    throw new IllegalStateException("vkEnumerateInstanceLayerProperties failed to find required validation layer.");
                 }
             }
 
@@ -135,7 +139,7 @@ public class VulkanInstance {
 
             Debug.logInfo("Create CreateInfo");
 
-            VkDebugUtilsMessengerCreateInfoEXT dbgCreateInfo;
+            VkDebugUtilsMessengerCreateInfoEXT dbgCreateInfo = null;
             if (VALIDATE) {
                 dbgCreateInfo = VkDebugUtilsMessengerCreateInfoEXT.malloc(stack)
                         .sType$Default()
