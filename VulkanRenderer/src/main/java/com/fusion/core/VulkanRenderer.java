@@ -6,6 +6,7 @@ import org.lwjgl.PointerBuffer;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.vulkan.*;
 
+import java.io.File;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
@@ -58,6 +59,9 @@ public class VulkanRenderer extends Renderer {
     private long desc_set;
 
     private LongBuffer framebuffers;
+//    private VulkanFramebuffer framebuffer;
+
+    private VulkanShader vertexShader, fragmentShader;
 
     private SwapchainBuffers[] buffers;
     private final IntBuffer     ip = memAllocInt(1);
@@ -209,12 +213,15 @@ public class VulkanRenderer extends Renderer {
         prepareVertices();
         prepareDescriptorLayout();
         prepareRenderPass();
+        vertexShader = new VulkanShader(device, new File("E:\\Github\\FusionCoreEngine\\Base\\Assets\\Vulkan\\Vert.glsl"), VK_SHADER_STAGE_VERTEX_BIT);
+        fragmentShader = new VulkanShader(device, new File("E:\\Github\\FusionCoreEngine\\Base\\Assets\\Vulkan\\Frag.glsl"), VK_SHADER_STAGE_FRAGMENT_BIT);
         preparePipeline();
 
         prepareDescriptorPool();
         prepareDescriptorSet();
 
         prepareFrameBuffers();
+//        framebuffer = new VulkanFramebuffer(device, width, height, render_pass);
     }
 
     private void prepareBuffer() {
@@ -669,12 +676,12 @@ public class VulkanRenderer extends Renderer {
             shaderStages.get(0)
                     .sType$Default()
                     .stage(VK_SHADER_STAGE_VERTEX_BIT)
-                    .module(vert_shader_module = demo_prepare_shader_module(VulkanUtils.vertShaderCode))
+                    .module(vert_shader_module = vertexShader.get())//demo_prepare_shader_module(VulkanUtils.vertShaderCode))
                     .pName(main);
             shaderStages.get(1)
                     .sType$Default()
                     .stage(VK_SHADER_STAGE_FRAGMENT_BIT)
-                    .module(frag_shader_module = demo_prepare_shader_module(VulkanUtils.fragShaderCode))
+                    .module(frag_shader_module = fragmentShader.get())
                     .pName(main);
 
             VkPipelineDepthStencilStateCreateInfo ds = VkPipelineDepthStencilStateCreateInfo.calloc(stack)
@@ -825,24 +832,24 @@ public class VulkanRenderer extends Renderer {
         }
     }
 
-    private long demo_prepare_shader_module(byte[] code) {
-        try (MemoryStack stack = stackPush()) {
-            ByteBuffer pCode = memAlloc(code.length).put(code);
-            pCode.flip();
-
-            VkShaderModuleCreateInfo moduleCreateInfo = VkShaderModuleCreateInfo.malloc(stack)
-                    .sType$Default()
-                    .pNext(NULL)
-                    .flags(0)
-                    .pCode(pCode);
-
-            VulkanUtils.check(vkCreateShaderModule(device, moduleCreateInfo, null, lp));
-
-            memFree(pCode);
-
-            return lp.get(0);
-        }
-    }
+//    private long demo_prepare_shader_module(byte[] code) {
+//        try (MemoryStack stack = stackPush()) {
+//            ByteBuffer pCode = memAlloc(code.length).put(code);
+//            pCode.flip();
+//
+//            VkShaderModuleCreateInfo moduleCreateInfo = VkShaderModuleCreateInfo.malloc(stack)
+//                    .sType$Default()
+//                    .pNext(NULL)
+//                    .flags(0)
+//                    .pCode(pCode);
+//
+//            VulkanUtils.check(vkCreateShaderModule(device, moduleCreateInfo, null, lp));
+//
+//            memFree(pCode);
+//
+//            return lp.get(0);
+//        }
+//    }
 
     private void demo_destroy_texture_image(TextureObject tex_obj) {
         /* clean up staging resources */
@@ -1221,19 +1228,6 @@ public class VulkanRenderer extends Renderer {
     @Override
     public void update() {
         demoDraw();
-        VkClearValue.Buffer clearvalue = VkClearValue.calloc(2);
-
-        clearvalue.get(0)
-                .color()
-                .float32(0, 1.0f)
-                .float32(1, 0.0f)
-                .float32(2, 0.0f)
-                .float32(3, 1.0f);
-
-        clearvalue.get(1)
-                .depthStencil()
-                .depth(1.0f)
-                .stencil(0);
     }
 
     @Override
@@ -1244,6 +1238,7 @@ public class VulkanRenderer extends Renderer {
             vkDestroyFramebuffer(device, framebuffers.get(i), null);
         }
         memFree(framebuffers);
+//        framebuffer.cleanup();
         vkDestroyDescriptorPool(device, desc_pool, null);
 
         if (setup_cmd != null) {
