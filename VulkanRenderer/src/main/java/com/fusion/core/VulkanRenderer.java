@@ -8,7 +8,6 @@ import org.lwjgl.vulkan.*;
 
 import java.io.File;
 import java.nio.ByteBuffer;
-import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.nio.LongBuffer;
 
@@ -27,7 +26,9 @@ public class VulkanRenderer extends Renderer {
     private static final int VERTEX_BUFFER_BIND_ID = 0;
 
     private TextureObject[] textures = new TextureObject[DEMO_TEXTURE_COUNT];
-    private Vertices vertices = new Vertices();
+//    private Vertices vertices = new Vertices();
+
+    private VulkanMesh vulkanMesh, vulkanMesh2;
 
     private GlfwWindow window;
 
@@ -67,8 +68,10 @@ public class VulkanRenderer extends Renderer {
     private final IntBuffer     ip = memAllocInt(1);
     private final LongBuffer lp = memAllocLong(1);
     private final PointerBuffer pp = memAllocPointer(1);
+    public VkPipelineVertexInputStateCreateInfo vi = VkPipelineVertexInputStateCreateInfo.calloc();
 
-    private VkPhysicalDeviceMemoryProperties memory_properties = VkPhysicalDeviceMemoryProperties.malloc();
+    public VkVertexInputBindingDescription.Buffer   vi_bindings = VkVertexInputBindingDescription.calloc(1);
+    public VkVertexInputAttributeDescription.Buffer vi_attrs    = VkVertexInputAttributeDescription.calloc(2);
 
     public VulkanRenderer(GlfwWindow  window){
         this.window = window;
@@ -178,7 +181,7 @@ public class VulkanRenderer extends Renderer {
             }
             color_space = surfFormats.get(0).colorSpace();
 
-            vkGetPhysicalDeviceMemoryProperties(instance.getGpu(), memory_properties);
+            vkGetPhysicalDeviceMemoryProperties(instance.getGpu(), VulkanUtils.memory_properties);
         }
 
     }
@@ -367,7 +370,7 @@ public class VulkanRenderer extends Renderer {
                     .allocationSize(mem_reqs.size())
                     .memoryTypeIndex(0);
 
-            boolean pass = memory_type_from_properties(mem_reqs.memoryTypeBits(), 0, mem_alloc);
+            boolean pass = VulkanUtils.memory_type_from_properties(mem_reqs.memoryTypeBits(), 0, mem_alloc);
             assert (pass);
 
             VulkanUtils.check(vkAllocateMemory(device, mem_alloc, null, lp));
@@ -524,64 +527,99 @@ public class VulkanRenderer extends Renderer {
     }
 
     private void prepareVertices(){
-        float[][] vb = {
-                /*      position             texcoord */
-                {-1.0f, -1.0f, 0.25f, 0.0f, 0.0f},
-                {1.0f, -1.0f, 0.25f, 1.0f, 0.0f},
-                {0.0f, 1.0f, 1.0f, 0.5f, 1.0f},
+        // Vertex buffer 1
+        float[] vertices1 = {
+                /* position */
+                -0.5f, -0.5f, 0.5f, // bottom left
+                0.0f, -0.5f, 0.05f, // bottom right
+                -0.8f, 0.0f, 0.1f, // top center
+        };
+        float[] texCoords1 = {
+                /* texcoord */
+                0.0f, 0.0f, // bottom left
+                1.0f, 0.0f, // bottom right
+                0.5f, 1.0f, // top center
         };
 
-        try(MemoryStack stack = stackPush()){
-            VkBufferCreateInfo buf_info = VkBufferCreateInfo.calloc(stack)
-                    .sType$Default()
-                    .size(vb.length * vb[0].length * 4)
-                    .usage(VK_BUFFER_USAGE_VERTEX_BUFFER_BIT)
-                    .sharingMode(VK_SHARING_MODE_EXCLUSIVE);
+// Vertex buffer 2
+        float[] vertices2 = {
+                /* position */
+                0.1f, -0.5f, 0.05f,
+                0.6f, -0.5f, 0.05f,
+                0.35f, 0.0f, 0.1f,
+        };
+        float[] texCoords2 = {
+                /* texcoord */
+                0.0f, 0.0f,
+                0.5f, 0.0f,
+                0.25f, 0.5f,
+        };
 
-            VulkanUtils.check(vkCreateBuffer(device, buf_info, null, lp));
-            vertices.buf = lp.get(0);
+        float[][] vb2 = {
+                /*      position            texcoord */
+                {0.1f, -0.5f, 0.05f, 0.0f, 0.0f},  // Bottom left corner
+                {0.6f, -0.5f, 0.05f, 1.0f, 0.0f},  // Bottom right corner
+                {0.6f,  0.0f, 0.05f, 1.0f, 1.0f},  // Top right corner
 
-            VkMemoryRequirements mem_reqs = VkMemoryRequirements.malloc(stack);
-            vkGetBufferMemoryRequirements(device, vertices.buf, mem_reqs);
+                {0.1f, -0.5f, 0.05f, 0.0f, 0.0f},  // Bottom left corner
+                {0.6f,  0.0f, 0.05f, 1.0f, 1.0f},  // Top right corner
+                {0.1f,  0.0f, 0.05f, 0.0f, 1.0f},  // Top left corner
+        };
 
-            VkMemoryAllocateInfo mem_alloc = VkMemoryAllocateInfo.calloc(stack)
-                    .sType$Default()
-                    .allocationSize(mem_reqs.size());
-            boolean pass = memory_type_from_properties(mem_reqs.memoryTypeBits(), VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, mem_alloc);
-            assert (pass);
+        // Vertex buffer for square
+        float[] squareVertices = {
+                /* position */
+                0.1f, -0.5f, 0.05f,  // Bottom left corner
+                0.6f, -0.5f, 0.05f,  // Bottom right corner
+                0.6f,  0.0f, 0.05f,  // Top right corner
+                0.1f, -0.5f, 0.05f,  // Bottom left corner
+                0.6f,  0.0f, 0.05f,  // Top right corner
+                0.1f,  0.0f, 0.05f,  // Top left corner
+        };
+        float[] squareTexCoords = {
+                /* texcoord */
+                0.0f, 0.0f, // Bottom left corner
+                1.0f, 0.0f, // Bottom right corner
+                1.0f, 1.0f, // Top right corner
+                0.0f, 0.0f, // Bottom left corner
+                1.0f, 1.0f, // Top right corner
+                0.0f, 1.0f, // Top left corner
+        };
 
-            VulkanUtils.check(vkAllocateMemory(device, mem_alloc, null, lp));
-            vertices.mem = lp.get(0);
 
-            VulkanUtils.check(vkMapMemory(device, vertices.mem, 0, mem_alloc.allocationSize(), 0, pp));
-            FloatBuffer data = pp.getFloatBuffer(0, ((int)mem_alloc.allocationSize()) >> 2);
-            data.put(vb[0]).put(vb[1]).put(vb[2]).flip();
-        }
 
-        vkUnmapMemory(device, vertices.mem);
+        vulkanMesh = new VulkanMesh(device, vertices1, texCoords1);
+        vulkanMesh2 = new VulkanMesh(device, vertices2, texCoords2);
 
-        VulkanUtils.check(vkBindBufferMemory(device, vertices.buf, vertices.mem, 0));
-
-        vertices.vi
+        //sets up the pipeline for 3d rendering
+        vi
                 .sType$Default()
                 .pNext(NULL)
-                .pVertexBindingDescriptions(vertices.vi_bindings)
-                .pVertexAttributeDescriptions(vertices.vi_attrs);
-
-        vertices.vi_bindings.get(0)
+                .pVertexBindingDescriptions(vi_bindings)
+                .pVertexAttributeDescriptions(vi_attrs);
+//
+        System.out.println(vb2[0].length * 4);
+        vi_bindings.get(0)
                 .binding(VERTEX_BUFFER_BIND_ID)
-                .stride(vb[0].length * 4)
+                // Stride is calculated by the sum of the values of each attribute multiplied by the byte size.
+                // For example, if you have vertices, normals, and texture coordinates, each taking 3, 3, and 2 values respectively,
+                // the stride would be calculated as: (vertices + normals + texCoords) * byteSize = (3 + 3 + 2) * 4
+                .stride((3 + 2) * 4)
                 .inputRate(VK_VERTEX_INPUT_RATE_VERTEX);
 
-        vertices.vi_attrs.get(0)
+        vi_attrs.get(0)
                 .binding(VERTEX_BUFFER_BIND_ID)
+                //sets the attribute location
                 .location(0)
+                //VK_FORMAT_R32G32B32_SFLOAT = RGB which sets location 0 to 3d coords
                 .format(VK_FORMAT_R32G32B32_SFLOAT)
                 .offset(0);
 
-        vertices.vi_attrs.get(1)
+        vi_attrs.get(1)
                 .binding(VERTEX_BUFFER_BIND_ID)
+                //sets the attribute location
                 .location(1)
+                //VK_FORMAT_R32G32_SFLOAT = RG which sets location 1 to 2d coords
                 .format(VK_FORMAT_R32G32_SFLOAT)
                 .offset(4 * 3);
     }
@@ -700,7 +738,9 @@ public class VulkanRenderer extends Renderer {
             pipeline
                     .sType$Default()
                     .pStages(shaderStages)
-                    .pVertexInputState(vertices.vi)
+//                    .pVertexInputState(vertices.vi)
+                    //uses the 3d setup for the pipeline
+                    .pVertexInputState(vi)
                     .pInputAssemblyState(
                             VkPipelineInputAssemblyStateCreateInfo.calloc(stack)
                                     .sType$Default()
@@ -921,7 +961,7 @@ public class VulkanRenderer extends Renderer {
                     .pNext(NULL)
                     .allocationSize(mem_reqs.size())
                     .memoryTypeIndex(0);
-            pass = memory_type_from_properties(mem_reqs.memoryTypeBits(), required_props, mem_alloc);
+            pass = VulkanUtils.memory_type_from_properties(mem_reqs.memoryTypeBits(), required_props, mem_alloc);
             assert (pass);
 
             /* allocate memory */
@@ -1031,22 +1071,6 @@ public class VulkanRenderer extends Renderer {
 
             vkCmdPipelineBarrier(setup_cmd, src_stages, dest_stages, 0, null, null, image_memory_barrier);
         }
-    }
-
-    private boolean memory_type_from_properties(int typeBits, int requirements_mask, VkMemoryAllocateInfo mem_alloc) {
-        // Search memtypes to find first index with those properties
-        for (int i = 0; i < VK_MAX_MEMORY_TYPES; i++) {
-            if ((typeBits & 1) == 1) {
-                // Type is available, does it match user properties?
-                if ((memory_properties.memoryTypes().get(i).propertyFlags() & requirements_mask) == requirements_mask) {
-                    mem_alloc.memoryTypeIndex(i);
-                    return true;
-                }
-            }
-            typeBits >>= 1;
-        }
-        // No memory types matched, return failure
-        return false;
     }
 
 
@@ -1196,10 +1220,19 @@ public class VulkanRenderer extends Renderer {
             vkCmdSetScissor(draw_cmd, 0, scissor);
 
             lp.put(0, 0);
-            LongBuffer pBuffers = stack.longs(vertices.buf);
-            vkCmdBindVertexBuffers(draw_cmd, VERTEX_BUFFER_BIND_ID, pBuffers, lp);
+            {
+//            LongBuffer pBuffers = stack.longs(vertices.buf);
+                LongBuffer pBuffers = stack.longs(vulkanMesh.buf);
+                vkCmdBindVertexBuffers(draw_cmd, VERTEX_BUFFER_BIND_ID, pBuffers, lp);
 
-            vkCmdDraw(draw_cmd, 3, 1, 0, 0);
+                vkCmdDraw(draw_cmd, 3, 1, 0, 0);
+
+                pBuffers = stack.longs(vulkanMesh2.buf);
+                vkCmdBindVertexBuffers(draw_cmd, VERTEX_BUFFER_BIND_ID, pBuffers, lp);
+
+                vkCmdDraw(draw_cmd, 6, 1, 0, 0);
+            }
+
             vkCmdEndRenderPass(draw_cmd);
 
             VkImageMemoryBarrier.Buffer prePresentBarrier = VkImageMemoryBarrier.malloc(1, stack)
@@ -1254,11 +1287,13 @@ public class VulkanRenderer extends Renderer {
         vkDestroyPipelineLayout(device, pipeline_layout, null);
         vkDestroyDescriptorSetLayout(device, desc_layout, null);
 
-        vkDestroyBuffer(device, vertices.buf, null);
-        vkFreeMemory(device, vertices.mem, null);
-        vertices.vi.free();
-        vertices.vi_bindings.free();
-        vertices.vi_attrs.free();
+//        vkDestroyBuffer(device, vertices.buf, null);
+//        vkFreeMemory(device, vertices.mem, null);
+        vi.free();
+        vi_bindings.free();
+        vi_attrs.free();
+        vulkanMesh.cleanup();
+        vulkanMesh2.cleanup();
 
         for (int i = 0; i < DEMO_TEXTURE_COUNT; i++) {
             vkDestroyImageView(device, textures[i].view, null);
@@ -1325,14 +1360,14 @@ public class VulkanRenderer extends Renderer {
         int  tex_width, tex_height;
     }
 
-    private static class Vertices {
-        long buf;
-        long mem;
-
-        VkPipelineVertexInputStateCreateInfo     vi          = VkPipelineVertexInputStateCreateInfo.calloc();
-        VkVertexInputBindingDescription.Buffer   vi_bindings = VkVertexInputBindingDescription.calloc(1);
-        VkVertexInputAttributeDescription.Buffer vi_attrs    = VkVertexInputAttributeDescription.calloc(2);
-    }
+//    private static class Vertices {
+//        long buf;
+//        long mem;
+//
+//        VkPipelineVertexInputStateCreateInfo     vi          = VkPipelineVertexInputStateCreateInfo.calloc();
+//        VkVertexInputBindingDescription.Buffer   vi_bindings = VkVertexInputBindingDescription.calloc(1);
+//        VkVertexInputAttributeDescription.Buffer vi_attrs    = VkVertexInputAttributeDescription.calloc(2);
+//    }
 
     @Override
     public boolean isOpenGL() {

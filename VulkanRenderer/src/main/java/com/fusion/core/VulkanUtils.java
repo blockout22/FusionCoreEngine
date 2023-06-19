@@ -1,9 +1,7 @@
 package com.fusion.core;
 
 import org.lwjgl.system.MemoryStack;
-import org.lwjgl.vulkan.VkDevice;
-import org.lwjgl.vulkan.VkExtensionProperties;
-import org.lwjgl.vulkan.VkPhysicalDevice;
+import org.lwjgl.vulkan.*;
 
 import java.nio.IntBuffer;
 
@@ -12,6 +10,9 @@ import static org.lwjgl.system.MemoryUtil.memAllocInt;
 import static org.lwjgl.vulkan.VK10.*;
 
 public class VulkanUtils {
+
+    public static VkPhysicalDeviceMemoryProperties memory_properties = VkPhysicalDeviceMemoryProperties.malloc();
+
     public static String deviceTypeToString(int deviceType) {
         switch (deviceType) {
             case VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU:
@@ -90,6 +91,22 @@ public class VulkanUtils {
         if (errcode != 0) {
             throw new IllegalStateException(String.format("Vulkan error [0x%X]", errcode));
         }
+    }
+
+    public static boolean memory_type_from_properties(int typeBits, int requirements_mask, VkMemoryAllocateInfo mem_alloc) {
+        // Search memtypes to find first index with those properties
+        for (int i = 0; i < VK_MAX_MEMORY_TYPES; i++) {
+            if ((typeBits & 1) == 1) {
+                // Type is available, does it match user properties?
+                if ((memory_properties.memoryTypes().get(i).propertyFlags() & requirements_mask) == requirements_mask) {
+                    mem_alloc.memoryTypeIndex(i);
+                    return true;
+                }
+            }
+            typeBits >>= 1;
+        }
+        // No memory types matched, return failure
+        return false;
     }
 
     public static final byte[] fragShaderCode = {
