@@ -10,6 +10,7 @@ import java.io.File;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.nio.LongBuffer;
+import java.util.ArrayList;
 
 import static org.lwjgl.glfw.GLFWVulkan.*;
 import static org.lwjgl.system.MemoryStack.*;
@@ -27,8 +28,6 @@ public class VulkanRenderer extends Renderer {
 
     private TextureObject[] textures = new TextureObject[DEMO_TEXTURE_COUNT];
 //    private Vertices vertices = new Vertices();
-
-    private VulkanMesh vulkanMesh, vulkanMesh2;
 
     private GlfwWindow window;
 
@@ -58,6 +57,7 @@ public class VulkanRenderer extends Renderer {
     private long pipeline;
     private long desc_pool;
     private long desc_set;
+    private long indexBuffer;
 
     private LongBuffer framebuffers;
 //    private VulkanFramebuffer framebuffer;
@@ -72,6 +72,9 @@ public class VulkanRenderer extends Renderer {
 
     public VkVertexInputBindingDescription.Buffer   vi_bindings = VkVertexInputBindingDescription.calloc(1);
     public VkVertexInputAttributeDescription.Buffer vi_attrs    = VkVertexInputAttributeDescription.calloc(2);
+
+    private ArrayList<VulkanMesh> meshList = new ArrayList<>();
+    private VulkanMesh vulkanMesh, vulkanMesh2;
 
     public VulkanRenderer(GlfwWindow  window){
         this.window = window;
@@ -540,6 +543,10 @@ public class VulkanRenderer extends Renderer {
                 1.0f, 0.0f, // bottom right
                 0.5f, 1.0f, // top center
         };
+        int[] indices1 = {
+                0, 1, 2
+        };
+
 
 // Vertex buffer 2
         float[] vertices2 = {
@@ -585,11 +592,19 @@ public class VulkanRenderer extends Renderer {
                 1.0f, 1.0f, // Top right corner
                 0.0f, 1.0f, // Top left corner
         };
+        int[] squareIndices = {
+                0, 1, 2,    // First triangle
+                3, 4, 5     // Second triangle
+        };
 
 
 
-        vulkanMesh = new VulkanMesh(device, vertices1, texCoords1);
-        vulkanMesh2 = new VulkanMesh(device, vertices2, texCoords2);
+
+        vulkanMesh = new VulkanMesh(device, vertices1, texCoords1, indices1);
+        vulkanMesh2 = new VulkanMesh(device, squareVertices, squareTexCoords, squareIndices);
+
+        meshList.add(vulkanMesh);
+        meshList.add(vulkanMesh2);
 
         //sets up the pipeline for 3d rendering
         vi
@@ -1222,15 +1237,26 @@ public class VulkanRenderer extends Renderer {
             lp.put(0, 0);
             {
 //            LongBuffer pBuffers = stack.longs(vertices.buf);
-                LongBuffer pBuffers = stack.longs(vulkanMesh.buf);
-                vkCmdBindVertexBuffers(draw_cmd, VERTEX_BUFFER_BIND_ID, pBuffers, lp);
+                for (int i = 0; i < meshList.size(); i++) {
+                    VulkanMesh mesh = meshList.get(i);
+                    LongBuffer pBuffers = stack.longs(mesh.vertexBuffer);
+                    vkCmdBindVertexBuffers(draw_cmd, VERTEX_BUFFER_BIND_ID, pBuffers, lp);
+                    //draw without indices
+//                    vkCmdDraw(draw_cmd, mesh.verticesCount, 1, 0, 0);
 
-                vkCmdDraw(draw_cmd, 3, 1, 0, 0);
-
-                pBuffers = stack.longs(vulkanMesh2.buf);
-                vkCmdBindVertexBuffers(draw_cmd, VERTEX_BUFFER_BIND_ID, pBuffers, lp);
-
-                vkCmdDraw(draw_cmd, 6, 1, 0, 0);
+                    //draw with indices
+                    vkCmdBindIndexBuffer(draw_cmd, mesh.indexBuffer, 0, VK_INDEX_TYPE_UINT32);
+                    vkCmdDrawIndexed(draw_cmd, mesh.indices.length, 1, 0, 0, 0);
+                }
+//                LongBuffer pBuffers = stack.longs(vulkanMesh.buf);
+//                vkCmdBindVertexBuffers(draw_cmd, VERTEX_BUFFER_BIND_ID, pBuffers, lp);
+//
+//                vkCmdDraw(draw_cmd, vulkanMesh.verticesCount, 1, 0, 0);
+//
+//                pBuffers = stack.longs(vulkanMesh2.buf);
+//                vkCmdBindVertexBuffers(draw_cmd, VERTEX_BUFFER_BIND_ID, pBuffers, lp);
+//
+//                vkCmdDraw(draw_cmd, vulkanMesh2.verticesCount, 1, 0, 0);
             }
 
             vkCmdEndRenderPass(draw_cmd);
