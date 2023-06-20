@@ -600,8 +600,11 @@ public class VulkanRenderer extends Renderer {
 
 
 
-        vulkanMesh = new VulkanMesh(device, vertices1, texCoords1, indices1);
-        vulkanMesh2 = new VulkanMesh(device, squareVertices, squareTexCoords, squareIndices);
+        VulkanModel triangleModel = new VulkanModel(vertices1, texCoords1, indices1);
+        vulkanMesh = new VulkanMesh(device, triangleModel);
+
+        VulkanModel squareModel = new VulkanModel(squareVertices, squareTexCoords, squareIndices);
+        vulkanMesh2 = new VulkanMesh(device, squareModel);
 
         meshList.add(vulkanMesh);
         meshList.add(vulkanMesh2);
@@ -1246,7 +1249,7 @@ public class VulkanRenderer extends Renderer {
 
                     //draw with indices
                     vkCmdBindIndexBuffer(draw_cmd, mesh.indexBuffer, 0, VK_INDEX_TYPE_UINT32);
-                    vkCmdDrawIndexed(draw_cmd, mesh.indices.length, 1, 0, 0, 0);
+                    vkCmdDrawIndexed(draw_cmd, mesh.getModel().getIndices().length, 1, 0, 0, 0);
                 }
 //                LongBuffer pBuffers = stack.longs(vulkanMesh.buf);
 //                vkCmdBindVertexBuffers(draw_cmd, VERTEX_BUFFER_BIND_ID, pBuffers, lp);

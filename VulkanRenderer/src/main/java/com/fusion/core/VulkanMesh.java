@@ -25,18 +25,18 @@ public class VulkanMesh {
 
     public int verticesCount = 0;
 
-    public int[] indices;
+    private VulkanModel model;
 
-    public VulkanMesh(VkDevice device, float[] vertices, float[] texCoords, int[] indices) {
+    public VulkanMesh(VkDevice device, VulkanModel model) {
         this.device = device;
-        verticesCount = vertices.length / 3;
-        this.indices = indices;
+        this.model = model;
+        verticesCount = model.getVertices().length / 3;
 
         try(MemoryStack stack = stackPush()){
             VkBufferCreateInfo buf_info = VkBufferCreateInfo.calloc(stack)
                     .sType$Default()
 //                    .size(vb.length * vb[0].length * 4)
-                    .size(vertices.length * texCoords.length * 4)
+                    .size(model.getVertices().length * model.getTexCoords().length * 4)
                     .usage(VK_BUFFER_USAGE_VERTEX_BUFFER_BIT)
                     .sharingMode(VK_SHARING_MODE_EXCLUSIVE);
 
@@ -57,12 +57,12 @@ public class VulkanMesh {
 
             VulkanUtils.check(vkMapMemory(device, mem, 0, mem_alloc.allocationSize(), 0, pp));
             FloatBuffer data = pp.getFloatBuffer(0, ((int)mem_alloc.allocationSize()) >> 2);
-            for(int i = 0; i < vertices.length / 3; i++) {
+            for(int i = 0; i < model.getVertices().length / 3; i++) {
                 // Add vertex
-                data.put(vertices, i * 3, 3);
+                data.put(model.getVertices(), i * 3, 3);
 
                 // Add texture coordinate
-                data.put(texCoords, i * 2, 2);
+                data.put(model.getTexCoords(), i * 2, 2);
             }
             data.flip();
         }
@@ -74,7 +74,7 @@ public class VulkanMesh {
         try(MemoryStack stack = stackPush()){
             VkBufferCreateInfo indexBuffInfo = VkBufferCreateInfo.calloc(stack)
                     .sType$Default()
-                    .size(indices.length * Integer.BYTES)
+                    .size(model.getIndices().length * Integer.BYTES)
                     .usage(VK_BUFFER_USAGE_INDEX_BUFFER_BIT)
                     .sharingMode(VK_SHARING_MODE_EXCLUSIVE);
 
@@ -95,13 +95,17 @@ public class VulkanMesh {
             indexMem = lp.get(0);
 
             VulkanUtils.check(vkMapMemory(device, indexMem, 0, mem_alloc.allocationSize(), 0, pp));
-            IntBuffer data = pp.getIntBuffer(0, indices.length);
-            data.put(indices).flip();
+            IntBuffer data = pp.getIntBuffer(0, model.getIndices().length);
+            data.put(model.getIndices()).flip();
 
             vkUnmapMemory(device, indexMem);
 
             VulkanUtils.check(vkBindBufferMemory(device, indexBuffer, indexMem, 0));
         }
+    }
+
+    public VulkanModel getModel(){
+        return model;
     }
 
     public void cleanup()
