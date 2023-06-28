@@ -1,9 +1,12 @@
 package com.fusion.core;
 
+import com.fusion.core.engine.Debug;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.vulkan.*;
 
 import java.nio.IntBuffer;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.lwjgl.system.MemoryStack.stackPush;
 import static org.lwjgl.system.MemoryUtil.memAllocInt;
@@ -69,22 +72,41 @@ public class VulkanUtils {
         }
     }
 
-    public static boolean isRaytracingSupported(VkPhysicalDevice device){
+    public static boolean isRaytracingSupported(VkExtensionProperties.Buffer device_extensions) {
         String[] requiredExtensions = new String[] {
                 "VK_KHR_acceleration_structure",
                 "VK_KHR_ray_tracing_pipeline",
-                "VK_KHR_get_physical_device_properties2",
-                "VK_KHR_deferred_host_operations",
-                "VK_KHR_spirv_1_4"
+                "VK_KHR_ray_query",
+                "VK_KHR_pipeline_library",
+                "VK_KHR_deferred_host_operations"
         };
 
-        IntBuffer ip = memAllocInt(1);
-        try(MemoryStack stack = stackPush()) {
-            VkExtensionProperties.Buffer availableExtensions = VkExtensionProperties.calloc(ip.get(0), stack);
-//            vkEnumerateDeviceExtensionProperties(device, null, ip, availableExtensions);
+        ArrayList<String> missingExtensions = new ArrayList<>(List.of(requiredExtensions));
+
+        for(String requiredExtension : requiredExtensions) {
+            boolean found = false;
+            for (int i = 0; i < device_extensions.capacity(); i++) {
+                device_extensions.position(i);
+                if(requiredExtension.equals(device_extensions.extensionNameString())) {
+                    found = true;
+                    missingExtensions.remove(device_extensions.extensionNameString());
+                    break;
+                }
+            }
+
+//            if (!found) {
+//                return false; // if any required extension is not found, return false immediately
+//            }
         }
 
-        return false;
+        if(!missingExtensions.isEmpty()){
+            Debug.logInfo("Missing Extensions for raytracing:-");
+            for (String s : missingExtensions) {
+                Debug.logInfo(s);
+            }
+            return false;
+        }
+        return true; // all required extensions are found, return true
     }
 
     public static void check(int errcode) {

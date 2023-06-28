@@ -197,25 +197,30 @@ public class VulkanInstance {
                 VulkanUtils.check(vkEnumerateDeviceExtensionProperties(gpu, (String)null, ip, device_extensions));
 
                 //check if ray tracing support;
-                String[] requiredExtensions = new String[] {
-                        "VK_KHR_acceleration_structure",
-                        "VK_KHR_ray_tracing_pipeline",
-                        "VK_KHR_get_physical_device_properties2",
-                        "VK_KHR_deferred_host_operations",
-                        "VK_KHR_spirv_1_4"
-                };
-                for(String requiredExtension : requiredExtensions)
-                {
-                    boolean found = false;
-                    for (int i = 0; i < device_extensions.capacity(); i++) {
-                        device_extensions.position(i);
-                        if(requiredExtension.equals(device_extensions.extensionNameString())){
-                            found = true;
-                            System.err.println("RayTrace: " + device_extensions.extensionNameString());
-                            break;
-                        }
-                    }
+                if(VulkanUtils.isRaytracingSupported(device_extensions)){
+                    Debug.logInfo("Raytracing is supported");
+                }else{
+                    Debug.logInfo("Raytracing NOT supported");
                 }
+//                String[] requiredExtensions = new String[] {
+//                        "VK_KHR_acceleration_structure",
+//                        "VK_KHR_ray_tracing_pipeline",
+//                        "VK_KHR_get_physical_device_properties2",
+//                        "VK_KHR_deferred_host_operations",
+//                        "VK_KHR_spirv_1_4"
+//                };
+//                for(String requiredExtension : requiredExtensions)
+//                {
+//                    boolean found = false;
+//                    for (int i = 0; i < device_extensions.capacity(); i++) {
+//                        device_extensions.position(i);
+//                        if(requiredExtension.equals(device_extensions.extensionNameString())){
+//                            found = true;
+//                            System.err.println("RayTrace: " + device_extensions.extensionNameString());
+//                            break;
+//                        }
+//                    }
+//                }
 
                 for (int i = 0; i < ip.get(0); i++) {
                     device_extensions.position(i);

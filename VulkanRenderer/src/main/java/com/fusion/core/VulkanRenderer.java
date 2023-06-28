@@ -7,7 +7,6 @@ import org.lwjgl.system.MemoryStack;
 import org.lwjgl.vulkan.*;
 
 import java.io.File;
-import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.nio.LongBuffer;
 import java.util.ArrayList;
@@ -24,7 +23,7 @@ public class VulkanRenderer extends Renderer {
     private static final boolean USE_STAGING_BUFFER = false;
 
     private static final int DEMO_TEXTURE_COUNT    = 1;
-    private static final int VERTEX_BUFFER_BIND_ID = 0;
+//    private static final int VERTEX_BUFFER_BIND_ID = 0;
 
     private TextureObject[] textures = new TextureObject[DEMO_TEXTURE_COUNT];
 //    private Vertices vertices = new Vertices();
@@ -54,7 +53,7 @@ public class VulkanRenderer extends Renderer {
     private long desc_layout;
     private long pipeline_layout;
     private long render_pass;
-    private long pipeline;
+//    private long pipeline;
     private long desc_pool;
     private long desc_set;
     private long indexBuffer;
@@ -62,16 +61,16 @@ public class VulkanRenderer extends Renderer {
     private LongBuffer framebuffers;
 //    private VulkanFramebuffer framebuffer;
 
-    private VulkanShader vertexShader, fragmentShader;
+    private VulkanShader mainShader;
 
     private SwapchainBuffers[] buffers;
     private final IntBuffer     ip = memAllocInt(1);
     private final LongBuffer lp = memAllocLong(1);
     private final PointerBuffer pp = memAllocPointer(1);
-    public VkPipelineVertexInputStateCreateInfo vi = VkPipelineVertexInputStateCreateInfo.calloc();
-
-    public VkVertexInputBindingDescription.Buffer   vi_bindings = VkVertexInputBindingDescription.calloc(1);
-    public VkVertexInputAttributeDescription.Buffer vi_attrs    = VkVertexInputAttributeDescription.calloc(2);
+//    public VkPipelineVertexInputStateCreateInfo vi = VkPipelineVertexInputStateCreateInfo.calloc();
+//
+//    public VkVertexInputBindingDescription.Buffer   vi_bindings = VkVertexInputBindingDescription.calloc(1);
+//    public VkVertexInputAttributeDescription.Buffer vi_attrs    = VkVertexInputAttributeDescription.calloc(2);
 
     private ArrayList<VulkanMesh> meshList = new ArrayList<>();
     private VulkanMesh vulkanMesh, vulkanMesh2;
@@ -216,12 +215,14 @@ public class VulkanRenderer extends Renderer {
         prepareBuffer();
         prepareDepth();
         prepareTextures();
-        prepareVertices();
         prepareDescriptorLayout();
         prepareRenderPass();
-        vertexShader = new VulkanShader(device, new File("E:\\Github\\FusionCoreEngine\\Base\\Assets\\Vulkan\\Vert.glsl"), VK_SHADER_STAGE_VERTEX_BIT);
-        fragmentShader = new VulkanShader(device, new File("E:\\Github\\FusionCoreEngine\\Base\\Assets\\Vulkan\\Frag.glsl"), VK_SHADER_STAGE_FRAGMENT_BIT);
-        preparePipeline();
+        //for shader class
+        prepareVertices();
+        mainShader = new VulkanShader(device, new File("E:\\Github\\FusionCoreEngine\\Base\\Assets\\Vulkan\\Vert.glsl"), new File("E:\\Github\\FusionCoreEngine\\Base\\Assets\\Vulkan\\Frag.glsl"));
+        mainShader.initShader(pipeline_layout, render_pass);
+        //for shader class
+//        preparePipeline();
 
         prepareDescriptorPool();
         prepareDescriptorSet();
@@ -475,7 +476,7 @@ public class VulkanRenderer extends Renderer {
                             textures[i].imageLayout,
                             0);
 
-                    demo_flush_init_cmd();
+                    flush_init_cmd();
 
                     demo_destroy_texture_image(staging_texture);
                 }else{
@@ -610,36 +611,37 @@ public class VulkanRenderer extends Renderer {
         meshList.add(vulkanMesh2);
 
         //sets up the pipeline for 3d rendering
-        vi
-                .sType$Default()
-                .pNext(NULL)
-                .pVertexBindingDescriptions(vi_bindings)
-                .pVertexAttributeDescriptions(vi_attrs);
+//        vi
+//                .sType$Default()
+//                .pNext(NULL)
+//                .pVertexBindingDescriptions(vi_bindings)
+//                .pVertexAttributeDescriptions(vi_attrs);
+////
+//        vi_bindings.get(0)
+//                .binding(VERTEX_BUFFER_BIND_ID)
+//                // Stride is calculated by the sum of the values of each attribute multiplied by the byte size.
+//                // For example, if you have vertices, normals, and texture coordinates, each taking 3, 3, and 2 values respectively,
+//                // the stride would be calculated as: (vertices + normals + texCoords) * byteSize = (3 + 3 + 2) * 4
+//                .stride((3 + 2) * 4)
+//                .inputRate(VK_VERTEX_INPUT_RATE_VERTEX);
 //
-        System.out.println(vb2[0].length * 4);
-        vi_bindings.get(0)
-                .binding(VERTEX_BUFFER_BIND_ID)
-                // Stride is calculated by the sum of the values of each attribute multiplied by the byte size.
-                // For example, if you have vertices, normals, and texture coordinates, each taking 3, 3, and 2 values respectively,
-                // the stride would be calculated as: (vertices + normals + texCoords) * byteSize = (3 + 3 + 2) * 4
-                .stride((3 + 2) * 4)
-                .inputRate(VK_VERTEX_INPUT_RATE_VERTEX);
-
-        vi_attrs.get(0)
-                .binding(VERTEX_BUFFER_BIND_ID)
-                //sets the attribute location
-                .location(0)
-                //VK_FORMAT_R32G32B32_SFLOAT = RGB which sets location 0 to 3d coords
-                .format(VK_FORMAT_R32G32B32_SFLOAT)
-                .offset(0);
-
-        vi_attrs.get(1)
-                .binding(VERTEX_BUFFER_BIND_ID)
-                //sets the attribute location
-                .location(1)
-                //VK_FORMAT_R32G32_SFLOAT = RG which sets location 1 to 2d coords
-                .format(VK_FORMAT_R32G32_SFLOAT)
-                .offset(4 * 3);
+//        vi_attrs.get(0)
+//                .binding(VERTEX_BUFFER_BIND_ID)
+//                //sets the attribute location e.g. if you want to use the data from this you can use the following in your shader code:-
+//                //layout(location = 0) in vec3 aPos;
+//                //in this case location equals the location (0) values set below vec3 is for format (VK_FORMAT_R32G32B32_SFLOAT) and aPos can be any variable name you choose
+//                .location(0)
+//                //VK_FORMAT_R32G32B32_SFLOAT = RGB which sets location 0 to 3d coords
+//                .format(VK_FORMAT_R32G32B32_SFLOAT)
+//                .offset(0);
+//
+//        vi_attrs.get(1)
+//                .binding(VERTEX_BUFFER_BIND_ID)
+//                //sets the attribute location
+//                .location(1)
+//                //VK_FORMAT_R32G32_SFLOAT = RG which sets location 1 to 2d coords
+//                .format(VK_FORMAT_R32G32_SFLOAT)
+//                .offset(4 * 3);
     }
 
     private void prepareDescriptorLayout(){
@@ -718,104 +720,104 @@ public class VulkanRenderer extends Renderer {
         }
     }
 
-    private void preparePipeline(){
-        long vert_shader_module;
-        long frag_shader_module;
-        long pipelineCache;
-
-        try(MemoryStack stack = stackPush()){
-            VkGraphicsPipelineCreateInfo.Buffer pipeline = VkGraphicsPipelineCreateInfo.calloc(1, stack);
-
-            ByteBuffer main = stack.UTF8("main");
-
-            VkPipelineShaderStageCreateInfo.Buffer shaderStages = VkPipelineShaderStageCreateInfo.calloc(2, stack);
-            shaderStages.get(0)
-                    .sType$Default()
-                    .stage(VK_SHADER_STAGE_VERTEX_BIT)
-                    .module(vert_shader_module = vertexShader.get())//demo_prepare_shader_module(VulkanUtils.vertShaderCode))
-                    .pName(main);
-            shaderStages.get(1)
-                    .sType$Default()
-                    .stage(VK_SHADER_STAGE_FRAGMENT_BIT)
-                    .module(frag_shader_module = fragmentShader.get())
-                    .pName(main);
-
-            VkPipelineDepthStencilStateCreateInfo ds = VkPipelineDepthStencilStateCreateInfo.calloc(stack)
-                    .sType$Default()
-                    .depthTestEnable(true)
-                    .depthWriteEnable(true)
-                    .depthCompareOp(VK_COMPARE_OP_LESS_OR_EQUAL)
-                    .depthBoundsTestEnable(false)
-                    .stencilTestEnable(false)
-                    .back(it -> it
-                            .failOp(VK_STENCIL_OP_KEEP)
-                            .passOp(VK_STENCIL_OP_KEEP)
-                            .compareOp(VK_COMPARE_OP_ALWAYS));
-            ds.front(ds.back());
-
-            pipeline
-                    .sType$Default()
-                    .pStages(shaderStages)
-//                    .pVertexInputState(vertices.vi)
-                    //uses the 3d setup for the pipeline
-                    .pVertexInputState(vi)
-                    .pInputAssemblyState(
-                            VkPipelineInputAssemblyStateCreateInfo.calloc(stack)
-                                    .sType$Default()
-                                    .topology(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST))
-                    .pViewportState(
-                            VkPipelineViewportStateCreateInfo.calloc(stack)
-                                    .sType$Default()
-                                    .viewportCount(1)
-                                    .scissorCount(1))
-                    .pRasterizationState(
-                            VkPipelineRasterizationStateCreateInfo.calloc(stack)
-                                    .sType$Default()
-                                    .polygonMode(VK_POLYGON_MODE_FILL)
-                                    .cullMode(VK_CULL_MODE_BACK_BIT)
-                                    .frontFace(VK_FRONT_FACE_CLOCKWISE)
-                                    .depthClampEnable(false)
-                                    .rasterizerDiscardEnable(false)
-                                    .depthBiasEnable(false)
-                                    .lineWidth(1.0f))
-                    .pMultisampleState(
-                            VkPipelineMultisampleStateCreateInfo.calloc(stack)
-                                    .sType$Default()
-                                    .pSampleMask(null)
-                                    .rasterizationSamples(VK_SAMPLE_COUNT_1_BIT))
-                    .pDepthStencilState(ds)
-                    .pColorBlendState(
-                            VkPipelineColorBlendStateCreateInfo.calloc(stack)
-                                    .sType$Default()
-                                    .pAttachments(
-                                            VkPipelineColorBlendAttachmentState.calloc(1, stack)
-                                                    .colorWriteMask(0xf)
-                                                    .blendEnable(false)
-                                    ))
-                    .pDynamicState(
-                            VkPipelineDynamicStateCreateInfo.calloc(stack)
-                                    .sType$Default()
-                                    .pDynamicStates(stack.ints(
-                                            VK_DYNAMIC_STATE_VIEWPORT,
-                                            VK_DYNAMIC_STATE_SCISSOR
-                                    )))
-                    .layout(pipeline_layout)
-                    .renderPass(render_pass);
-
-            VkPipelineCacheCreateInfo pipelineCacheCI = VkPipelineCacheCreateInfo.calloc(stack).sType$Default();
-
-            VulkanUtils.check(vkCreatePipelineCache(device, pipelineCacheCI, null, lp));
-            pipelineCache = lp.get(0);
-
-            VulkanUtils.check(vkCreateGraphicsPipelines(device, pipelineCache, pipeline, null, lp));
-            this.pipeline = lp.get(0);
-
-            vkDestroyPipelineCache(device, pipelineCache, null);
-
-            vkDestroyShaderModule(device, frag_shader_module, null);
-            vkDestroyShaderModule(device, vert_shader_module, null);
-        }
-    }
+//    private void preparePipeline(){
+//        long vert_shader_module;
+//        long frag_shader_module;
+//        long pipelineCache;
+//
+//        try(MemoryStack stack = stackPush()){
+//            VkGraphicsPipelineCreateInfo.Buffer pipeline = VkGraphicsPipelineCreateInfo.calloc(1, stack);
+//
+//            ByteBuffer main = stack.UTF8("main");
+//
+//            VkPipelineShaderStageCreateInfo.Buffer shaderStages = VkPipelineShaderStageCreateInfo.calloc(2, stack);
+//            shaderStages.get(0)
+//                    .sType$Default()
+//                    .stage(VK_SHADER_STAGE_VERTEX_BIT)
+//                    .module(vert_shader_module = vertexShader.get())//demo_prepare_shader_module(VulkanUtils.vertShaderCode))
+//                    .pName(main);
+//            shaderStages.get(1)
+//                    .sType$Default()
+//                    .stage(VK_SHADER_STAGE_FRAGMENT_BIT)
+//                    .module(frag_shader_module = fragmentShader.get())
+//                    .pName(main);
+//
+//            VkPipelineDepthStencilStateCreateInfo ds = VkPipelineDepthStencilStateCreateInfo.calloc(stack)
+//                    .sType$Default()
+//                    .depthTestEnable(true)
+//                    .depthWriteEnable(true)
+//                    .depthCompareOp(VK_COMPARE_OP_LESS_OR_EQUAL)
+//                    .depthBoundsTestEnable(false)
+//                    .stencilTestEnable(false)
+//                    .back(it -> it
+//                            .failOp(VK_STENCIL_OP_KEEP)
+//                            .passOp(VK_STENCIL_OP_KEEP)
+//                            .compareOp(VK_COMPARE_OP_ALWAYS));
+//            ds.front(ds.back());
+//
+//            pipeline
+//                    .sType$Default()
+//                    .pStages(shaderStages)
+////                    .pVertexInputState(vertices.vi)
+//                    //uses the 3d setup for the pipeline
+//                    .pVertexInputState(vi)
+//                    .pInputAssemblyState(
+//                            VkPipelineInputAssemblyStateCreateInfo.calloc(stack)
+//                                    .sType$Default()
+//                                    .topology(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST))
+//                    .pViewportState(
+//                            VkPipelineViewportStateCreateInfo.calloc(stack)
+//                                    .sType$Default()
+//                                    .viewportCount(1)
+//                                    .scissorCount(1))
+//                    .pRasterizationState(
+//                            VkPipelineRasterizationStateCreateInfo.calloc(stack)
+//                                    .sType$Default()
+//                                    .polygonMode(VK_POLYGON_MODE_FILL)
+//                                    .cullMode(VK_CULL_MODE_BACK_BIT)
+//                                    .frontFace(VK_FRONT_FACE_CLOCKWISE)
+//                                    .depthClampEnable(false)
+//                                    .rasterizerDiscardEnable(false)
+//                                    .depthBiasEnable(false)
+//                                    .lineWidth(1.0f))
+//                    .pMultisampleState(
+//                            VkPipelineMultisampleStateCreateInfo.calloc(stack)
+//                                    .sType$Default()
+//                                    .pSampleMask(null)
+//                                    .rasterizationSamples(VK_SAMPLE_COUNT_1_BIT))
+//                    .pDepthStencilState(ds)
+//                    .pColorBlendState(
+//                            VkPipelineColorBlendStateCreateInfo.calloc(stack)
+//                                    .sType$Default()
+//                                    .pAttachments(
+//                                            VkPipelineColorBlendAttachmentState.calloc(1, stack)
+//                                                    .colorWriteMask(0xf)
+//                                                    .blendEnable(false)
+//                                    ))
+//                    .pDynamicState(
+//                            VkPipelineDynamicStateCreateInfo.calloc(stack)
+//                                    .sType$Default()
+//                                    .pDynamicStates(stack.ints(
+//                                            VK_DYNAMIC_STATE_VIEWPORT,
+//                                            VK_DYNAMIC_STATE_SCISSOR
+//                                    )))
+//                    .layout(pipeline_layout)
+//                    .renderPass(render_pass);
+//
+//            VkPipelineCacheCreateInfo pipelineCacheCI = VkPipelineCacheCreateInfo.calloc(stack).sType$Default();
+//
+//            VulkanUtils.check(vkCreatePipelineCache(device, pipelineCacheCI, null, lp));
+//            pipelineCache = lp.get(0);
+//
+//            VulkanUtils.check(vkCreateGraphicsPipelines(device, pipelineCache, pipeline, null, lp));
+//            this.pipeline = lp.get(0);
+//
+//            vkDestroyPipelineCache(device, pipelineCache, null);
+//
+//            vkDestroyShaderModule(device, frag_shader_module, null);
+//            vkDestroyShaderModule(device, vert_shader_module, null);
+//        }
+//    }
 
     private void prepareDescriptorPool(){
         try(MemoryStack stack = stackPush()){
@@ -915,7 +917,7 @@ public class VulkanRenderer extends Renderer {
         vkFreeMemory(device, tex_obj.mem, null);
     }
 
-    private void demo_flush_init_cmd() {
+    private void flush_init_cmd() {
         if (setup_cmd == null) {
             return;
         }
@@ -1092,7 +1094,7 @@ public class VulkanRenderer extends Renderer {
     }
 
 
-    public void demoDraw(){
+    public void draw(){
         try(MemoryStack stack = stackPush()){
             VkSemaphoreCreateInfo semaphoreCreateInfo = VkSemaphoreCreateInfo.malloc(stack)
                     .sType$Default()
@@ -1111,7 +1113,7 @@ public class VulkanRenderer extends Renderer {
                     ip);
 
             if(err == VK_ERROR_OUT_OF_DATE_KHR){
-                demoDraw();
+                draw();
                 vkDestroySemaphore(device, drawCompleteSemaphore, null);
                 vkDestroySemaphore(device, imageAcquiredSemaphore, null);
                 return;
@@ -1122,7 +1124,7 @@ public class VulkanRenderer extends Renderer {
             }
             current_buffer = ip.get(0);
 
-            demo_flush_init_cmd();
+            flush_init_cmd();
 
             draw_build_cmd();
             LongBuffer lp2 = stack.mallocLong(1);
@@ -1216,7 +1218,8 @@ public class VulkanRenderer extends Renderer {
             vkCmdPipelineBarrier(draw_cmd, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, 0, null, null, image_memory_barrier);
             vkCmdBeginRenderPass(draw_cmd, rp_begin, VK_SUBPASS_CONTENTS_INLINE);
 
-            vkCmdBindPipeline(draw_cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline);
+//            vkCmdBindPipeline(draw_cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline);
+            vkCmdBindPipeline(draw_cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, mainShader.getPipeline());
 
             lp.put(0, desc_set);
             vkCmdBindDescriptorSets(draw_cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline_layout, 0, lp, null);
@@ -1243,7 +1246,8 @@ public class VulkanRenderer extends Renderer {
                 for (int i = 0; i < meshList.size(); i++) {
                     VulkanMesh mesh = meshList.get(i);
                     LongBuffer pBuffers = stack.longs(mesh.vertexBuffer);
-                    vkCmdBindVertexBuffers(draw_cmd, VERTEX_BUFFER_BIND_ID, pBuffers, lp);
+//                    vkCmdBindVertexBuffers(draw_cmd, VERTEX_BUFFER_BIND_ID, pBuffers, lp);
+                    vkCmdBindVertexBuffers(draw_cmd, mainShader.getBuffer(), pBuffers, lp);
                     //draw without indices
 //                    vkCmdDraw(draw_cmd, mesh.verticesCount, 1, 0, 0);
 
@@ -1289,7 +1293,7 @@ public class VulkanRenderer extends Renderer {
 
     @Override
     public void update() {
-        demoDraw();
+        draw();
     }
 
     @Override
@@ -1311,16 +1315,17 @@ public class VulkanRenderer extends Renderer {
         vkFreeCommandBuffers(device, cmd_pool, draw_cmd);
         vkDestroyCommandPool(device, cmd_pool, null);
 
-        vkDestroyPipeline(device, pipeline, null);
+//        vkDestroyPipeline(device, pipeline, null);
+        mainShader.cleanup();
         vkDestroyRenderPass(device, render_pass, null);
         vkDestroyPipelineLayout(device, pipeline_layout, null);
         vkDestroyDescriptorSetLayout(device, desc_layout, null);
 
 //        vkDestroyBuffer(device, vertices.buf, null);
 //        vkFreeMemory(device, vertices.mem, null);
-        vi.free();
-        vi_bindings.free();
-        vi_attrs.free();
+//        vi.free();
+//        vi_bindings.free();
+//        vi_attrs.free();
         vulkanMesh.cleanup();
         vulkanMesh2.cleanup();
 
